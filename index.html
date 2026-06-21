@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>戦国AIエージェントTCG（仮）— 軍師、参陣</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/game.css">
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- データ層 -->
+  <script src="src/data/cards.js"></script>
+  <script src="src/data/commands.js"></script>
+  <script src="src/data/decks.js"></script>
+  <!-- エンジン -->
+  <script src="src/engine/engine.js"></script>
+  <!-- UI -->
+  <script src="src/ui/ui.js"></script>
+  <!-- 起動：スタート画面を表示 -->
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      // UI は読み込み時に自動初期化済み。スタート画面を出す。
+      UI.render();
+      // GAME 未生成ならスタート画面
+      if (!Engine.GAME) { /* ui.js の showStart が render 経由で出る */ }
+    });
+  </script>
+</body>
+</html>

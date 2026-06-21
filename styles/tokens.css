@@ -1,0 +1,84 @@
+/* ===========================================================
+   戦国AIエージェントTCG ── デザイントークン
+   DESIGN.md（明朝・和紙白・単色アクセント・余白と罫線で格を出す）を継承し
+   和風・浮世絵に最小調整したもの。影/グラデ/角丸は使わない。
+   =========================================================== */
+
+/* オンライン時のみ明朝Webフォントを読む（オフラインは system serif にフォールバック） */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+:root {
+  /* --- 地（背景）--- */
+  --washi:    #FAFAF7;   /* 和紙オフホワイト：盤・UIの地 */
+  --paper:    #F3EEE6;   /* 帯・補助の紙色 */
+  --washi-d:  #ECE6DA;   /* 一段濃い紙（枠の中地） */
+
+  /* --- 墨（文字・罫線）--- */
+  --sumi:     #141414;   /* 墨：本文・主の文字 */
+  --sumi2:    #2A2A2A;
+  --sumi3:    #4A4A4A;   /* 小見出し・キャプション */
+  --mute:     #7A7A7A;   /* 出典・補助 */
+  --rule:     #1A1A1A;   /* 強い罫線 */
+  --rule-soft:#CFC9BD;   /* 弱い罫線 */
+
+  /* --- 朱（唯一のアクセント）--- */
+  --shu:      #B8222E;   /* 朱：主張・最新値・現在地・敵 */
+  --shu-d:    #8B1820;
+  --shu-soft: #F5E4E4;   /* 朱の面 */
+
+  /* --- 勢力色（家の識別。藍・群青・金茶など）--- */
+  --ai:       #1F3A5F;   /* 藍：武田 */
+  --gunjo:    #2E5A8C;   /* 群青：上杉 */
+  --kincha:   #6B5424;   /* 金茶：徳川 */
+  --kin:      #C9A24B;   /* 金：豊臣・伝説の縁 */
+  --kin-soft: #F4E9CC;
+
+  /* --- 資源・状態の色 --- */
+  --hei:      #4A6B2F;   /* 兵（緑＝兵糧/動員） */
+  --context:  #2E5A8C;   /* コンテキスト予算（藍系） */
+  --token:    #9A6B1F;   /* トークン（黄土） */
+
+  /* --- 書体 --- */
+  --serif: 'Noto Serif JP', 'Yu Mincho', 'YuMincho', 'Hiragino Mincho ProN', serif;
+  --sans:  'Noto Sans JP', 'Yu Gothic', 'YuGothic', 'Hiragino Sans', sans-serif;
+  --num:   'Roboto', 'Helvetica Neue', Arial, sans-serif;
+
+  /* --- 余白スケール --- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  height: 100%;
+  background: var(--washi);
+  color: var(--sumi);
+  font-family: var(--serif);
+  font-weight: 500;
+  /* 和紙の地：ごく薄いノイズ風グラデは使わず単色＋微細罫で「紙」を表現 */
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(0,0,0,0.012) 27px 28px);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 影・角丸・グラデは禁止（DESIGN.md）。深さは罫線と面で出す。 */
+button { font-family: var(--serif); border-radius: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--shu); outline-offset: 2px; }
+
+/* テキストは必ず箱の中。はみ出し・意図しない折返しを禁止 */
+.clip { overflow: hidden; }
+.nowrap { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 章ラベル等：字間を広く取る明朝/ゴシック */
+.label {
+  font-family: var(--sans);
+  letter-spacing: 0.18em;
+  font-weight: 700;
+}
+
+/* 朱アンダーライン（主張の強調） */
+.mark { box-shadow: inset 0 -0.32em 0 var(--shu-soft); }
+.mark-line { border-bottom: 3px solid var(--shu); }

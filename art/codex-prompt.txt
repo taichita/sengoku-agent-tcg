@@ -1,0 +1,9 @@
+このリポジトリの art/prompts/prompts.json を読んでください。
+各エントリ（characters と equipment）について、styleAnchor を prompt の先頭に必ず連結し、
+OpenAI の画像生成モデル gpt-image-2 で画像を1枚ずつ生成し、
+絶対パス C:\dev\sengoku-agent-tcg\art\images\<file> に PNG で保存してください。
+サイズは 1024x1536（縦長）、quality は high。
+OPENAI_API_KEY は環境変数から読みます。
+すでに images に同名ファイルがあるものはスキップしてください。
+art/generate_images.py が使えるなら、それを実行してくれて構いません（python art/generate_images.py）。
+生成後、足りない/失敗した画像があれば一覧で報告してください。

@@ -1,0 +1,31 @@
+{
+  "_about": "全キャラのGPT Image 2用プロンプト。styleAnchor を各 prompt の先頭に必ず付けて生成する。出力は images/<file> へ。",
+  "model": "gpt-image-2",
+  "size": "1024x1536",
+  "quality": "high",
+  "outDir": "../images",
+  "styleAnchor": "STYLE: Japanese ukiyo-e woodblock print, musha-e (samurai warrior print) in the dramatic style of Utagawa Kuniyoshi. Bold black sumi keyblock outlines, flat color planes with minimal shading, subtle bokashi gradient background, aged washi paper texture, limited traditional pigment palette (vermilion, indigo, sumi black, gold leaf, ultramarine, malachite green). Portrait orientation, a SINGLE character, upper body, centered, dignified, ample negative space at the top. Cool, refined, gallery-grade. NO text or letters, NO photorealism, NO 3D render, NO modern objects, NO watercolor bleed, NO frame or border.",
+  "characters": [
+    { "file": "ashigaru.png",  "name": "足軽",       "prompt": "SUBJECT: a nameless ashigaru foot soldier, humble and determined, wearing a simple tan okegawa-do armor and a conical jingasa hat, gripping a long yari spear. Muted earth tones with a small touch of vermilion on the sash. Anonymous everyman who could one day rise to greatness." },
+    { "file": "kiba.png",      "name": "騎馬武者",   "prompt": "SUBJECT: a mounted samurai (kiba-musha) on a rearing warhorse, dynamic diagonal motion, swirling dust, drawn sword, sense of speed and momentum. Indigo and earth tones with vermilion tassels." },
+    { "file": "yari.png",      "name": "槍足軽",     "prompt": "SUBJECT: a spear ashigaru holding an extremely long yari raised toward the sky, disciplined formation feeling, simple lamellar armor. Sumi black and tan with indigo." },
+    { "file": "yumi.png",      "name": "弓兵",       "prompt": "SUBJECT: an archer (yumi-hei) in side profile drawing a great asymmetric longbow to full draw, intense focused aim, calm tension. Indigo and washi cream tones." },
+    { "file": "teppo.png",     "name": "鉄砲足軽",   "prompt": "SUBJECT: a matchlock gunner (teppo ashigaru) firing an arquebus, burst of spark and gray gunsmoke, the new age of warfare. Sumi black, gray smoke, a flash of vermilion fire." },
+    { "file": "mitsuhide.png", "name": "明智光秀",   "prompt": "SUBJECT: Akechi Mitsuhide, a calm and intelligent samurai general, refined armor bearing the bellflower (kikyo) crest, composed scholarly face that hides a flicker of buried ambition. Indigo and silver accents, restrained and noble." },
+    { "file": "yamagata.png",  "name": "山県昌景",   "prompt": "SUBJECT: Yamagata Masakage, fierce Takeda vanguard general clad in the iconic bright RED armor (aka-zonae), brandishing a war fan, ferocious battle-ready expression. Dominant crimson with indigo, explosive energy." },
+    { "file": "kanetsugu.png", "name": "直江兼続",   "prompt": "SUBJECT: Naoe Kanetsugu, a noble dignified general wearing the famous helmet crowned with the large kanji for LOVE (愛), serene righteous bearing. Ultramarine and gold accents on dark armor." },
+    { "file": "tadakatsu.png", "name": "本多忠勝",   "prompt": "SUBJECT: Honda Tadakatsu, the invincible warrior, wearing a black armor and the famous great deer-antler helmet, shouldering the legendary spear Tonbogiri, imposing and unbreakable. Deep sumi black with gold antlers, towering presence." },
+    { "file": "tokichiro.png", "name": "木下藤吉郎", "prompt": "SUBJECT: a young Kinoshita Tokichiro (the future Hideyoshi) as a clever low-rank retainer with a lively monkey-like grin and bright eyes, plain light armor, radiating restless rising ambition. Earth tones with a single hopeful gleam of gold." },
+    { "file": "nobunaga.png",  "name": "織田信長",   "prompt": "SUBJECT: Oda Nobunaga as the Demon King of the Sixth Heaven (Dairokuten Mao), a charismatic and ruthless overlord in black-and-gold armor with a flowing vermilion cape, surrounded by faint matchlock flames and a commanding aura. LEGENDARY: lavish gold leaf, vermilion, sumi black, overwhelming presence of a conqueror who will remake the age." },
+    { "file": "shingen.png",   "name": "武田信玄",   "prompt": "SUBJECT: Takeda Shingen, the Tiger of Kai, a powerful monk-general in deep indigo armor, behind him the Furinkazan war banner (wind-forest-fire-mountain), commanding immovable presence, distant mountains. LEGENDARY: deep indigo, gold, ultramarine, the stillness of a mountain." },
+    { "file": "kenshin.png",   "name": "上杉謙信",   "prompt": "SUBJECT: Uesugi Kenshin, the God of War and avatar of Bishamonten, wearing a white monk's hood over silver armor, serene yet ferocious divine expression, a war banner bearing the character for Bishamonten. LEGENDARY: ultramarine, silver, white, a halo of divine calm." },
+    { "file": "ieyasu.png",    "name": "徳川家康",   "prompt": "SUBJECT: Tokugawa Ieyasu, a patient and shrewd daimyo with a calm tanuki-like knowing expression, golden-brown armor, holding a war fan, the quiet confidence of a man who waits to seize the realm. LEGENDARY: golden-brown, gold leaf, sumi black, patient gravitas." },
+    { "file": "hideyoshi.png", "name": "豊臣秀吉",   "prompt": "SUBJECT: Toyotomi Hideyoshi at the height of power, the man who rose from peasant to ruler of all Japan, in opulent gold armor before his golden gourd standard (senbyo-tan), a triumphant sunburst behind him. LEGENDARY: brilliant gold leaf, vermilion, the radiance of the ultimate rise to the top." }
+  ],
+  "equipment": [
+    { "file": "katana.png",   "name": "名刀 正宗", "prompt": "SUBJECT: an ornate Japanese tachi sword 'Masamune' with a glinting curved blade and gold fittings, displayed on a lacquer stand, ukiyo-e still life, no character." },
+    { "file": "gusoku.png",   "name": "当世具足", "prompt": "SUBJECT: a complete suit of samurai armor (tosei gusoku) with a horned kabuto, mounted on a stand, imposing and empty, ukiyo-e still life, no character." },
+    { "file": "sashimono.png","name": "采配旗",   "prompt": "SUBJECT: a commander's saihai baton crossed with a tall war banner (sashimono) fluttering, ukiyo-e still life, no character." },
+    { "file": "horo.png",     "name": "母衣",     "prompt": "SUBJECT: a horo cloak, a large round silk balloon-cape billowing dramatically as if on a rider's back, ukiyo-e, no character." }
+  ]
+}

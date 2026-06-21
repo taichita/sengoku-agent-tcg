@@ -1,0 +1,4 @@
+node_modules/
+.DS_Store
+test/*.log
+# 生成済みの浮世絵（art/images/*.png）はゲームに必要なので含める（バックアップとしてそのまま動くように）

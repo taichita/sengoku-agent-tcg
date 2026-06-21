@@ -1,0 +1,21 @@
+{
+  "name": "sengoku-agent-tcg",
+  "version": "1.0.0",
+  "description": "**令和から戦国に転生した軍師となり、Claude Code のコマンドを打って天下を狙うカードゲーム。** 表は「ポケポケ」と同じ手触りのカードバトル、裏はAIエージェントに命令を出して武器や有利を作る——その二刀流が肝です。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "jsdom": "^29.1.1",
+    "playwright": "^1.61.0"
+  }
+}
