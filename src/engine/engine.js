@@ -18,7 +18,7 @@
       damage: 0, energy: 0, equip: null, status: [],
       atkBuff: 0,            // /code-review 等の恒久バフ（この武将に付く）
       hpBonus: 0,            // CPU(敵)の兵力上乗せ（兵力に勝る相手の表現）
-      evolvedThisTurn: false, placedThisTurn: false, suppliedThisTurn: false,
+      evolvedThisTurn: false, placedThisTurn: false, suppliedThisTurn: 0,
     };
   }
   function maxHp(inst) {
@@ -168,19 +168,22 @@
     G.GAME.firstMoveDone = true;
     draw(p, 1);
     p.energy += 2; // 兵站の配給。在庫として兵站庫に貯まり、好きな武将へ好きなだけ配れる
+    const stObj = G.GAME.stadium;
+    const st = stObj && stObj.inst.card.effect;
+    if (st && st.supplyLine && stObj.owner === p.id) p.energy += st.supplyLine;
     if (!p.noAgent) p.context = clamp(p.context + 5, 0, p.contextMax); // コンテキストの自然回復は控えめ＝毎ターン義務的に撃つのでなく「ここぞ」で撃つ資源に
-    // 特性：木下藤吉郎=兵+1 / 豊臣秀吉=context+5 / 直江兼続=回復10
+    // 特性：兵站役=兵+1 / 豊臣秀吉=context+5 / 直江兼続=回復15
     forEachOwn(p, inst => {
       if (!inst) return;
       const ab = inst.card.ability;
       if (!ab) return;
-      if (ab.name === '出世の才') p.energy += 1;
+      if (ab.name === '出世の才' || ab.name === '兵站奉行') p.energy += 1;
       if (ab.name === '人たらし') p.context = clamp(p.context + 5, 0, p.contextMax);
-      if (ab.name === '愛の兜') inst.damage = Math.max(0, inst.damage - 10);
+      if (ab.name === '愛の兜') inst.damage = Math.max(0, inst.damage - 15);
     });
     p.supportUsed = false; p.retreated = false; p.stadiumUsed = false;
     // 金縛りは自分の番開始で解除予約（自番終了時に解除）。新規配置フラグ・兵糧補給フラグ解除
-    [p.active, ...p.bench, p.honjin].forEach(inst => { if (inst) { inst.evolvedThisTurn = false; inst.placedThisTurn = false; inst.suppliedThisTurn = false; } });
+    [p.active, ...p.bench, p.honjin].forEach(inst => { if (inst) { inst.evolvedThisTurn = false; inst.placedThisTurn = false; inst.suppliedThisTurn = 0; } });
     log(`${p.name}の番。早馬と兵站が届いた。`);
   }
 
@@ -197,10 +200,14 @@
     if (!t && p.honjin && p.honjin.uid === targetUid) t = p.honjin; // 本陣の大名にも兵糧を蓄えられる
     if (!t) return fail('送り先の武将がいません。');
     // 兵站の都合：同じ武将へ送れるのは1ターンに1つまで（前線に付けて下げて再付与…の二重取りを防ぐ）
-    if (t.suppliedThisTurn) return fail(`${t.card.name}へは今ターンもう兵糧を送りました。別の武将になら送れます。`);
-    t.suppliedThisTurn = true;
+    const activeTarget = p.active && p.active.uid === t.uid;
+    const supplyLimit = activeTarget ? 2 : 1;
+    const supplied = Number(t.suppliedThisTurn || 0);
+    if (supplied >= supplyLimit) return fail(`${t.card.name}へは今ターンもう兵糧を送り切りました（先鋒は2つ、後備えと本陣は1つまで）。`);
+    t.suppliedThisTurn = supplied + 1;
     p.energy -= 1; t.energy += 1;
-    log(`${t.card.name}へ兵糧を送った（その武将の兵糧${t.energy}／在庫の残り${p.energy}）。`);
+    pushFx({ kind: 'attach', uid: t.uid });
+    log(`${t.card.name}へ兵糧を送った（今ターン${t.suppliedThisTurn}/${supplyLimit}・その武将の兵糧${t.energy}／在庫の残り${p.energy}）。`);
     return ok();
   };
 
@@ -265,6 +272,7 @@
     if (ef.heal != null) { const t = findOwn(p, targetUid) || p.active; if (t) t.damage = Math.max(0, t.damage - ef.heal); }
     if (ef.draw != null) draw(p, ef.draw);
     if (ef.energy != null) p.energy += ef.energy;
+    if (ef.activeEnergy != null && p.active) { p.active.energy += ef.activeEnergy; pushFx({ kind: 'attach', uid: p.active.uid }); }
     if (ef.atkThisTurn != null) p.buffs.nextAttack += ef.atkThisTurn;
     if (ef.statusEnemy != null) applyStatus(G.opp().active, ef.statusEnemy);
     if (c.card.kind === 'support') p.supportUsed = true;
@@ -363,7 +371,12 @@
         msg += `、後備え全員に${sp}の一斉ダメージ。`;
         break;
       }
-      case 'restoreContext': p.context = clamp(p.context + amt, 0, p.contextMax); msg += `コンテキスト予算+${amt}。`; break;
+      case 'restoreContext':
+        p.context = clamp(p.context + amt, 0, p.contextMax);
+        msg += `コンテキスト予算+${amt}`;
+        if (e.energy) { p.energy += e.energy; msg += `、兵糧+${e.energy}`; }
+        msg += '。';
+        break;
       case 'shield': p.buffs.shield += amt; msg += `次の相手ターン、受けるダメージ-${amt}。`; break;
       case 'parallelUp': p.parallelMax += amt; msg += `並列上限が${p.parallelMax}に。`; break;
       case 'fullHeal': if (p.active) { p.active.damage = 0; msg += `${p.active.card.name}のダメージを全回復。`; } break;
@@ -371,6 +384,7 @@
       default: break;
     }
     log(msg, p.id);
+    pushFx({ kind: 'commandDone', side: p.id });
     checkKO(opp); checkWin();
   }
 
@@ -421,10 +435,14 @@
     // 相性（弱点）+20
     if (opp.active && opp.active.card.weakness && opp.active.card.weakness === a.card.faction) dmg += 20;
     // 陣形
-    const st = G.GAME.stadium && G.GAME.stadium.inst.card.effect;
+    const stObj = G.GAME.stadium;
+    const st = stObj && stObj.inst.card.effect;
     if (st) {
       if (st.plainsCavalry && a.card.heisyu === '騎') dmg += st.plainsCavalry;
       if (st.rainGuns && a.card.heisyu === '砲') dmg += st.rainGuns;
+      if (st.gunline && a.card.heisyu === '砲') dmg += st.gunline;
+      if (st.spearWall && a.card.heisyu === '槍') dmg += st.spearWall;
+      if (st.archerNest && a.card.heisyu === '弓') dmg += st.archerNest;
     }
     // 特性
     forEachOwn(p, inst => {
@@ -442,6 +460,7 @@
     const e = move.effect; if (!e) return;
     // 狙撃・巻き添えは後備えのみ対象。本陣に控える大名は無傷（出陣するまで傷つかない）。
     const bench = opp.bench.filter(x => x);
+    if (e.status && opp.active) { applyStatus(opp.active, e.status); log(`${opp.active.card.name}は「${e.status}」を受けた。`); }
     if (e.benchSplash) { const b = bench[0]; if (b) { dealRaw(b, e.benchSplash); log(`巻き添えで後備えの${b.card.name}に${e.benchSplash}のダメージ。`); } }
     if (e.benchAll) { let any = false; opp.bench.forEach(b => { if (b) { dealRaw(b, e.benchAll); any = true; } }); if (any) log(`相手の後備え全員に${e.benchAll}の巻き添え。`); }
     if (e.benchTarget) { const b = bench[0]; if (b) { dealRaw(b, e.benchTarget); log(`後備えの${b.card.name}に${e.benchTarget}のダメージ。`); } }
@@ -464,7 +483,7 @@
   function applyStatus(inst, st) {
     if (!inst) return;
     if (inst.equip && inst.equip.effect && inst.equip.effect.statusImmune) return;
-    if (inst.card.ability && (inst.card.ability.name === '律儀者' || inst.card.ability.name === '生涯無傷')) return;
+    if (inst.card.ability && (inst.card.ability.name === '律儀者' || inst.card.ability.name === '生涯無傷' || inst.card.ability.name === '伏見の忠義')) return;
     // 行動阻害系は上書き（同時1つ）
     if (['油断', '金縛り', '混乱'].includes(st)) inst.status = inst.status.filter(s => !['油断', '金縛り', '混乱'].includes(s));
     if (!inst.status.includes(st)) inst.status.push(st);
@@ -545,6 +564,7 @@
     if (!owner.honjin) return;
     owner.active = owner.honjin; owner.honjin = null;
     owner.active.placedThisTurn = false; owner.active.evolvedThisTurn = false; owner.active.status = [];
+    pushFx({ kind: 'deploy', uid: owner.active.uid });
     log(`本陣の大名【${owner.active.card.name}】が出陣！ 満身の兵力で最後の砦に立つ。`, owner.id);
   }
   function promoteBench(owner) {
@@ -623,7 +643,13 @@
       if (hi >= 0) G.playFromHand(hi, 'active');
     }
     // 3) 兵糧を配備（前線に1・後備え/本陣に最大2＝上限まで。後方の大名も育てる）
-    [p.active, ...p.bench, p.honjin].filter(Boolean).forEach(t => { if (p.energy > 0) G.attachEnergy(t.uid); });
+    if (p.active) {
+      const costs = p.active.card.moves.map(m => m.cost).sort((a, b) => a - b);
+      const want = costs.find(c => c > p.active.energy) || costs[costs.length - 1] || 1;
+      while (p.energy > 0 && p.active.energy < want && (p.active.suppliedThisTurn || 0) < 2) G.attachEnergy(p.active.uid);
+    }
+    [p.bench[0], p.bench[1], p.bench[2], p.honjin].filter(Boolean).forEach(t => { if (p.energy > 0) G.attachEnergy(t.uid); });
+    if (p.active && p.energy > 0 && (p.active.suppliedThisTurn || 0) < 2) G.attachEnergy(p.active.uid);
     // 4) 装備があれば先鋒へ
     const eqi = p.hand.findIndex(c => c.card.type === 'equip');
     if (eqi >= 0 && p.active && !p.active.equip) G.equip(eqi, p.active.uid);

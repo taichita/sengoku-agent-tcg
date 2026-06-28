@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>戦国AIエージェントTCG UI Vision</title>
+  <link rel="stylesheet" href="mockup.css">
+</head>
+<body data-screen="idle">
+  <div class="app-shell" aria-label="戦国AIエージェントTCG モックアップ">
+    <div class="stage-backdrop">
+      <div class="castle"></div>
+      <div class="war-banners"></div>
+      <div class="field-ring"></div>
+    </div>
+
+    <header class="top-hud">
+      <section class="commander-strip enemy-strip">
+        <span class="strip-label">敵軍</span>
+        <strong>織田信長</strong>
+        <span class="small-stat">首級 0/3</span>
+        <span class="small-stat">山札 13</span>
+        <span class="small-stat">兵糧 0</span>
+      </section>
+      <section class="turn-banner">
+        <span>第3手番</span>
+        <strong>あなたの番</strong>
+        <span>19:35</span>
+      </section>
+      <section class="commander-strip player-strip">
+        <span class="strip-label">軍師</span>
+        <strong>あなた</strong>
+        <span class="small-stat">脳容量 30/100</span>
+        <span class="small-stat">命令 3/3</span>
+        <span class="small-stat">捨札 3</span>
+      </section>
+    </header>
+
+    <main class="battlefield">
+      <section class="enemy-hand" aria-label="敵手札">
+        <div class="mini-back rotate-left"></div>
+        <div class="mini-back"></div>
+        <div class="mini-back rotate-right"></div>
+      </section>
+
+      <section class="side-base enemy-daimyo">
+        <article class="daimyo-card" style="--art: url('../../art/images/nobunaga.png')">
+          <span>本陣</span>
+          <strong>織田信長</strong>
+          <small>兵力 200/200</small>
+        </article>
+      </section>
+
+      <section class="battle-zone enemy-zone" aria-label="敵陣">
+        <div class="slot bench-slot">
+          <article class="tcg-card small" style="--art: url('../../art/images/yari.png')">
+            <div class="card-head"><span>たね</span><strong>槍足軽</strong><b>90</b></div>
+            <div class="card-art"></div>
+            <div class="card-foot"><span>兵糧 2</span><span>首級1</span></div>
+          </article>
+        </div>
+        <div class="slot active-slot enemy-target">
+          <article class="tcg-card small active-enemy" style="--art: url('../../art/images/ashigaru.png')">
+            <div class="card-head"><span>たね</span><strong>足軽</strong><b>70</b></div>
+            <div class="card-art"></div>
+            <div class="card-foot"><span>兵糧 2</span><span>混乱</span></div>
+          </article>
+        </div>
+        <div class="slot empty-slot"><span>後備え</span></div>
+      </section>
+
+      <section class="center-field">
+        <div class="stadium-chip">陣形なし</div>
+        <div class="lane-line"></div>
+        <div class="turn-prompt">命令または攻撃を選択</div>
+      </section>
+
+      <section class="battle-zone player-zone" aria-label="自陣">
+        <div class="slot bench-slot">
+          <article class="tcg-card small" style="--art: url('../../art/images/teppo.png')">
+            <div class="card-head"><span>たね</span><strong>鉄砲足軽</strong><b>80</b></div>
+            <div class="card-art"></div>
+            <div class="card-foot"><span>兵糧 1</span><span>首級1</span></div>
+          </article>
+        </div>
+        <div class="slot active-slot player-active">
+          <article class="tcg-card large selected-card" style="--art: url('../../art/images/tokichiro.png')">
+            <div class="card-head"><span>侍大将</span><strong>木下藤吉郎</strong><b>130</b></div>
+            <div class="card-art"></div>
+            <div class="card-effect">出世の才</div>
+            <div class="move-row"><span>一夜城</span><b>40</b></div>
+            <div class="move-row"><span>墨俣築城</span><b>65</b></div>
+          </article>
+        </div>
+        <div class="slot bench-slot">
+          <article class="tcg-card small" style="--art: url('../../art/images/yari.png')">
+            <div class="card-head"><span>たね</span><strong>槍足軽</strong><b>100</b></div>
+            <div class="card-art"></div>
+            <div class="card-foot"><span>兵糧 0</span><span>首級1</span></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="side-base player-daimyo">
+        <article class="daimyo-card" style="--art: url('../../art/images/hideyoshi.png')">
+          <span>本陣</span>
+          <strong>豊臣秀吉</strong>
+          <small>兵力 180/180</small>
+        </article>
+      </section>
+    </main>
+
+    <button class="round-handle left-handle" aria-label="メニュー">三</button>
+    <button class="round-handle right-handle" aria-label="戦況">記</button>
+
+    <section class="bottom-hand" aria-label="手札">
+      <article class="hand-card tilt-a" style="--art: url('../../art/images/katana.png')">
+        <span>装備</span><strong>名刀</strong><small>正宗</small>
+      </article>
+      <article class="hand-card tilt-b trainer">
+        <span>軍需品</span><strong>金瘡医</strong><small>30回復</small>
+      </article>
+      <article class="hand-card tilt-c command-card">
+        <span>命令札</span><strong>/plan</strong><small>軍議</small>
+      </article>
+      <article class="hand-card tilt-d" style="--art: url('../../art/images/gusoku.png')">
+        <span>装備</span><strong>具足</strong><small>上限+40</small>
+      </article>
+      <article class="hand-card tilt-e command-card">
+        <span>命令札</span><strong>/compact</strong><small>兵站圧縮</small>
+      </article>
+    </section>
+
+    <nav class="command-dock" aria-label="主要操作">
+      <button class="dock-button primary">攻撃</button>
+      <button class="dock-button">命令</button>
+      <button class="dock-button">交代</button>
+      <button class="dock-button end">番を終わる</button>
+    </nav>
+
+    <aside class="drawer drawer-left" aria-label="軍師の命令">
+      <div class="drawer-head">
+        <span>軍師の命令</span>
+        <strong>進行中 3/3</strong>
+      </div>
+      <article class="order-card active">
+        <div><b>/plan</b><strong>軍議</strong></div>
+        <span>残り2手番</span>
+        <div class="progress"><i style="width: 42%"></i></div>
+      </article>
+      <article class="order-card">
+        <div><b>/code-review</b><strong>軍師の添削</strong></div>
+        <span>残り3手番</span>
+        <div class="progress"><i style="width: 25%"></i></div>
+      </article>
+      <article class="order-card">
+        <div><b>/compact</b><strong>兵站圧縮</strong></div>
+        <span>残り1手番</span>
+        <div class="progress"><i style="width: 68%"></i></div>
+      </article>
+    </aside>
+
+    <aside class="drawer drawer-right" aria-label="戦況">
+      <div class="drawer-head">
+        <span>戦況</span>
+        <strong>あなた優勢</strong>
+      </div>
+      <div class="context-meter">
+        <span>脳容量</span>
+        <div><i style="width: 30%"></i></div>
+        <b>30/100</b>
+      </div>
+      <section class="tree-panel">
+        <h2>ワークツリー</h2>
+        <p>軍師 /plan</p>
+        <p class="indent">戦場の地勢を調べる</p>
+        <p>軍師 /code-review</p>
+        <p class="indent">弱点を洗い出す</p>
+        <p class="indent">改善案を作る</p>
+      </section>
+      <section class="log-panel">
+        <h2>戦記</h2>
+        <p>木下藤吉郎へ兵糧を送った。</p>
+        <p>/compact を発注。家臣が動き出した。</p>
+        <p>/plan を発注。戦場の調査を開始。</p>
+      </section>
+    </aside>
+
+    <svg class="attack-layer" viewBox="0 0 1600 900" aria-hidden="true">
+      <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z"></path>
+        </marker>
+      </defs>
+      <path d="M810 563 C800 470, 785 400, 790 330"></path>
+    </svg>
+    <div class="damage-burst">95</div>
+    <section class="attack-confirm">
+      <span>墨俣築城</span>
+      <strong>65 + 軍議30 = 95</strong>
+      <button>放つ</button>
+      <button class="ghost">戻る</button>
+    </section>
+
+    <section class="modal warlord-modal" aria-label="武将カード詳細">
+      <article class="detail-card" style="--art: url('../../art/images/tokichiro.png')">
+        <div class="detail-art"></div>
+        <div class="detail-card-name">
+          <span>侍大将 / 豊臣</span>
+          <strong>木下藤吉郎</strong>
+        </div>
+      </article>
+      <article class="detail-sheet">
+        <div class="sheet-title">
+          <span>武将詳細</span>
+          <strong>兵力 130/130</strong>
+        </div>
+        <h1>木下藤吉郎</h1>
+        <p class="flavor">草履を懐で温めた男。天下はもう目の前。</p>
+        <div class="ability-box">
+          <span>特性</span>
+          <strong>出世の才</strong>
+          <p>自分のターン開始時、兵糧の在庫を1多くためる。</p>
+        </div>
+        <div class="move-grid">
+          <div><span>一夜城</span><b>40</b><small>兵糧 1</small></div>
+          <div><span>墨俣築城</span><b>65</b><small>兵糧 2</small></div>
+        </div>
+        <div class="stat-row">
+          <span>弱点 徳川</span>
+          <span>退き口 1</span>
+          <span>首級 2</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="modal command-modal" aria-label="命令札詳細">
+      <article class="command-detail-card">
+        <span>命令札</span>
+        <strong>/plan</strong>
+        <em>軍議</em>
+        <div class="command-seal">設計</div>
+      </article>
+      <article class="detail-sheet command-sheet">
+        <div class="sheet-title">
+          <span>命令詳細</span>
+          <strong>残り2手番</strong>
+        </div>
+        <h1>/plan 軍議</h1>
+        <p class="flavor">先に作戦を立て、次の一手を強くする。</p>
+        <div class="ability-box">
+          <span>完成時</span>
+          <strong>次の攻撃だけ +30</strong>
+          <p>自分の先鋒のワザに追加ダメージを与える。</p>
+        </div>
+        <div class="command-meta">
+          <span>脳容量 10</span>
+          <span>軍師付き調役</span>
+          <span>並列枠 1</span>
+        </div>
+        <div class="worktree-line">
+          <b>作業</b>
+          <span>戦場の地勢を調べる</span>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const screen = params.get('screen') || 'idle';
+    document.body.dataset.screen = screen;
+  </script>
+</body>
+</html>

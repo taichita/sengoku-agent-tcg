@@ -60,6 +60,16 @@ try {
   ok(!!doc.querySelector('.handbar'), '手札バーが描画されている');
   ok(!!doc.querySelector('[data-act="cmdmenu"]'), '軍師の命令ボタンが存在する');
   ok(!!doc.querySelector('[data-act="endturn"]'), '番を終わるボタンが存在する');
+  if (E.GAME.current === 'p1' && !E.GAME.winner) {
+    const p = E.GAME.players.p1;
+    const benchTarget = p.bench.find(Boolean);
+    if (benchTarget && p.energy > 0) {
+      const beforeEnergy = benchTarget.energy;
+      click('[data-act="energyReserve"]');
+      clickEl(doc.querySelector(`.mine [data-act="warlord"][data-uid="${benchTarget.uid}"]`));
+      ok(benchTarget.energy === beforeEnergy + 1, '後備えの武将にも兵糧を送れる');
+    }
+  }
 
   console.log('--- カード詳細（クリックで詳細→確認してから使う）---');
   if (E.GAME.current === 'p1' && !E.GAME.winner && doc.querySelector('[data-act="hand"]')) {
@@ -89,7 +99,7 @@ try {
   for (let t = 0; t < 10 && !E.GAME.winner; t++) {
     if (E.GAME.current !== 'p1') { drain(); continue; }
     const p = E.GAME.players.p1;
-    if (p.active) { click('[data-act="energy"]'); const wl = doc.querySelector(`.mine [data-act="warlord"][data-uid="${p.active.uid}"]`); if (wl) clickEl(wl); }
+    if (p.active) { click('[data-act="energyReserve"]'); const wl = doc.querySelector(`.mine [data-act="warlord"][data-uid="${p.active.uid}"]`); if (wl) clickEl(wl); }
     const evi = E.GAME.turn >= 2 ? p.hand.findIndex(c => c.card.type === 'warlord' && c.card.stage > 0 &&
       [p.active, ...p.bench].some(b => b && b.card.id === c.card.evolvesFrom && !b.placedThisTurn && !b.evolvedThisTurn)) : -1;
     if (evi >= 0) {
@@ -98,7 +108,11 @@ try {
       const use = doc.querySelector(`[data-act="useHand"][data-i="${evi}"]`); if (use) clickEl(use); // 出世させる
       const wl = doc.querySelector(`[data-act="warlord"][data-uid="${tgt.uid}"]`); if (wl) clickEl(wl);
     }
-    const mv = doc.querySelector('.mine [data-act="move"]');
+    const active = p.active && doc.querySelector(`.mine [data-act="warlord"][data-uid="${p.active.uid}"]`);
+    if (active) clickEl(active);
+    const attack = doc.querySelector('[data-act="selectAttack"]');
+    if (attack) clickEl(attack);
+    const mv = doc.querySelector('[data-act="move"]');
     if (mv) clickEl(mv); else click('[data-act="endturn"]');
     drain();
   }
