@@ -1,7 +1,7 @@
 /* 新スタート画面（5家選択）と新デッキ（上杉vs徳川）の実機確認。 node test/shot8.js */
 const { chromium } = require('playwright');
 const fs = require('fs');
-const SHOTS = 'C:/Users/taich/AppData/Local/Temp/claude/c--Users-taich-SingularitySociety/cf481873-0584-4bae-bdbc-4d4a1e6dfd6d/scratchpad/shots';
+const SHOTS = require('path').join(require('os').tmpdir(), 'sengoku-shots');
 fs.mkdirSync(SHOTS, { recursive: true });
 const URL = 'http://localhost:8777/index.html';
 const tryClick = async (pg, sel) => { try { const el = await pg.$(sel); if (el) { await el.click({ timeout: 800 }); return true; } } catch (e) {} return false; };

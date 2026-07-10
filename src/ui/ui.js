@@ -367,6 +367,20 @@
     document.addEventListener('dragstart', onDragStart);
     document.addEventListener('dragover', onDragOver);
     document.addEventListener('drop', onDrop);
+    applyResponsiveScale();
+    window.addEventListener('resize', applyResponsiveScale);
+    window.addEventListener('orientationchange', applyResponsiveScale);
+  }
+
+  // 盤面は基準サイズ(1180x720)固定で描画し、実画面に収まるよう縮小率を都度計算する（主にスマホ対応）。
+  // window.innerWidth/Height は本UI自体の描画サイズに引っ張られて信頼できないため、
+  // documentElement.clientWidth/Height（真の表示領域）を使う。
+  function applyResponsiveScale() {
+    const DESIGN_W = 1180, DESIGN_H = 720;
+    const cw = document.documentElement.clientWidth;
+    const ch = document.documentElement.clientHeight;
+    const scale = Math.min(cw / DESIGN_W, ch / DESIGN_H);
+    document.documentElement.style.setProperty('--ui-scale', scale);
   }
   window.UI = {
     start(p1, p2, m) {
@@ -916,7 +930,7 @@
         ? `<span class="hc-thumb" style="--fac:${fac.color};${artVars(c)}"><img src="${esc(c.art)}" alt="" onerror="this.style.display='none';this.parentNode.classList.add('noimg')"><span class="hc-thumb-fb">${esc(c.name)}</span></span>`
         : `<span class="hc-thumb noimg ${kc}" style="--fac:${fac.color}"><span class="hc-thumb-fb">${kind}</span></span>`;
       let eff;
-      if (c.type === 'warlord') eff = c.stage === 0 ? `兵力${c.hp}・${esc(c.moves[0].name)}` : `兵力${c.hp}・${esc(c.evolvesFrom)}から出世`;
+      if (c.type === 'warlord') eff = c.evolvesFrom ? `兵力${c.hp}・${esc(c.evolvesFrom)}から出世` : `兵力${c.hp}・${esc(c.moves[0].name)}`;
       else eff = esc(c.text || '');
       // レア演出：侍大将＝✦／大名＝✦✦（金の光沢）
       const rare = (c.type === 'warlord' && c.stage === 2) ? 'rare2 gleam' : (c.type === 'warlord' && c.stage === 1) ? 'rare gleam' : '';
@@ -1137,7 +1151,7 @@
         <div class="cd-moves">${moves}</div>
         <div class="cd-meta">${c.weakness ? `相性▽${esc(c.weakness)}（+20）　` : ''}退き口：兵${c.retreat}　討たれると首級${c.kubi}</div>
         ${effHTML}
-        <div class="cd-evo">${c.stage > 0 ? `「${esc(c.evolvesFrom)}」から出世した姿` : 'たね（無名の兵士・出世の起点）'}</div>
+        <div class="cd-evo">${c.evolvesFrom ? `「${esc(c.evolvesFrom)}」から出世した姿` : (c.daimyo ? '大名（本陣に控え、切り札として出陣）' : 'たね（無名の兵士・出世の起点）')}</div>
         <div class="cd-flavor">${esc(c.flavor || '')}</div>`;
     }
     const kind = c.type === 'equip' ? '装備（武将1人に1点）' : c.type === 'stadium' ? '陣形（場に1枚）' : (c.kind === 'support' ? '軍師の采配（1ターンに1枚）' : '軍需品（1ターンに何枚でも）');
@@ -1228,7 +1242,7 @@
     const m = c.moves[0];
     let s = `兵力${c.hp}・${m.name}${m.dmg ? '(' + m.dmg + ')' : ''}`;
     if (c.ability) s += `・特性「${c.ability.name}」`;
-    if (c.stage > 0) s += `／「${c.evolvesFrom}」から出世`;
+    if (c.evolvesFrom) s += `／「${c.evolvesFrom}」から出世`;
     return esc(s);
   }
   function showDeckGuide(deckId) {
