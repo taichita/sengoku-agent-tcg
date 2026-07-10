@@ -49,12 +49,12 @@
     moves:[{name:'不動の槍', cost:1, dmg:35, text:''},{name:'鬼美濃', cost:2, dmg:85, text:''}], weakness:'織田', retreat:2, kubi:2,
     art:'art/images/baba.png', flavor:'倒れぬ老将。武田の槍を支える柱。' };
   C['直江兼続'] = { id:'直江兼続', type:'warlord', name:'直江兼続', yomi:'なおえ かねつぐ', rank:'侍大将', stage:1, evolvesFrom:'槍足軽', faction:'上杉', heisyu:'槍',
-    hp:130, ability:{name:'愛の兜', text:'自分のターン開始時、この武将のダメージを15回復する。', type:'passive'},
-    moves:[{name:'義の檄', cost:1, dmg:30, text:''},{name:'義の一槍', cost:2, dmg:75, text:''}], weakness:'武田', retreat:2, kubi:2,
+    hp:135, ability:{name:'愛の兜', text:'自分のターン開始時、この武将のダメージを15回復する。', type:'passive'},
+    moves:[{name:'義の檄', cost:1, dmg:30, text:''},{name:'義の一槍', cost:2, dmg:80, text:''}], weakness:'武田', retreat:2, kubi:2,
     art:'art/images/kanetsugu.png', flavor:'兜に掲げし「愛」の一文字。' };
   C['甘粕景持'] = { id:'甘粕景持', type:'warlord', name:'甘粕景持', yomi:'あまかす かげもち', rank:'侍大将', stage:1, evolvesFrom:'弓兵', faction:'上杉', heisyu:'弓',
-    hp:120, ability:null,
-    moves:[{name:'援護射撃', cost:1, dmg:25, text:'相手の後備え1体に25。', effect:{benchTarget:25}},{name:'雨裂きの矢', cost:2, dmg:70, text:'相手の後備え1体に20。', effect:{benchTarget:20}}], weakness:'武田', retreat:1, kubi:2,
+    hp:130, ability:null,
+    moves:[{name:'援護射撃', cost:1, dmg:25, text:'相手の後備え1体に25。', effect:{benchTarget:25}},{name:'雨裂きの矢', cost:2, dmg:78, text:'相手の後備え1体に20。', effect:{benchTarget:20}}], weakness:'武田', retreat:1, kubi:2,
     art:'art/images/amakasu.png', flavor:'義の軍勢を遠間から支える弓取り。' };
   C['本多忠勝'] = { id:'本多忠勝', type:'warlord', name:'本多忠勝', yomi:'ほんだ ただかつ', rank:'侍大将', stage:1, evolvesFrom:'槍足軽', faction:'徳川', heisyu:'槍',
     hp:150, ability:{name:'生涯無傷', text:'状態異常を受けない。', type:'passive'},
@@ -83,8 +83,8 @@
     moves:[{name:'騎馬突撃', cost:3, dmg:125, text:''}], weakness:'織田', retreat:1, kubi:3,
     art:'art/images/shingen.png', flavor:'動かざること山の如し。甲斐の虎。' };
   C['上杉謙信'] = { id:'上杉謙信', type:'warlord', name:'上杉謙信', yomi:'うえすぎ けんしん', rank:'大名', stage:2, daimyo:true, evolvesFrom:null, faction:'上杉', heisyu:'槍', legend:true,
-    hp:170, ability:{name:'毘沙門天', text:'コイン（軍配）がオモテなら、ワザのダメージ+30。', type:'passive'},
-    moves:[{name:'車懸り', cost:2, dmg:90, text:''}], weakness:'武田', retreat:1, kubi:3,
+    hp:185, ability:{name:'毘沙門天', text:'コイン（軍配）がオモテなら、ワザのダメージ+30。', type:'passive'},
+    moves:[{name:'車懸り', cost:2, dmg:100, text:''}], weakness:'武田', retreat:1, kubi:3,
     art:'art/images/kenshin.png', flavor:'我は毘沙門天の化身なり。軍神、降臨。' };
   C['徳川家康'] = { id:'徳川家康', type:'warlord', name:'徳川家康', yomi:'とくがわ いえやす', rank:'大名', stage:2, daimyo:true, evolvesFrom:null, faction:'徳川', heisyu:'槍', legend:true,
     hp:200, ability:{name:'忍耐', text:'ダメージが100以上のとき、ワザのダメージ+40。', type:'passive'},
