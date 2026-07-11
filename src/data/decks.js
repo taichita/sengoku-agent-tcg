@@ -53,7 +53,7 @@
     '兵站道','鉄砲陣地',
   ];
 
-  const COMMAND_LOADOUT = ['plan','code-review','security-review','codex-exec','compact','sandbox','agents','rewind','model','memory','deep-research'];
+  const COMMAND_LOADOUT = ['plan','code-review','security-review','codex-exec','compact','sandbox','agents','rewind','model','memory','deep-research','hooks','yolo','resume'];
 
   window.DECKS = {
     oda:      { id:'oda',      name:'織田家', faction:'織田', daimyo:'織田信長', tagline:'火・朱／速攻と鉄砲。出世で押し切る。',        cards: ODA.slice(0,20) },

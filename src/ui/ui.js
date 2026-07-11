@@ -13,6 +13,19 @@
   let startP1 = 'oda', startP2 = 'takeda'; // スタート画面で選択中の家
   let root, panelEl, toastTimer;
   let cmdCart = [];       // 命令メニューで選択中の命令id（まとめて発令する）
+  let deckDraft = null;   // デッキ編集中の作業用データ {deckId, counts:{cardId:枚数}}
+  const DEFAULT_DECK_CARDS = {}; // 初期デッキ（「初期に戻す」用に起動時のみ複製して保持）
+  Object.keys(DECKS).forEach(id => { DEFAULT_DECK_CARDS[id] = DECKS[id].cards.slice(); });
+  const DECK_SIZE = 20, MAX_COPIES = 3;
+
+  // このデッキ（家）に入れられるカード一覧＝無所属の共通札＋自家の武将のみ（他家の武将は入れられない＝属性制約）
+  function legalCardsFor(faction) {
+    return Object.keys(CARDS).filter(id => {
+      const c = CARDS[id];
+      if (c.type === 'warlord' && c.stage === 2) return false; // 大名はデッキ外（本陣専用）
+      return c.faction === '無所属' || c.faction === faction;
+    });
+  }
 
   // 盤面の下側に表示する「自分」視点のプレイヤー
   function viewer() {
@@ -408,6 +421,11 @@
     if (act === 'sfxtoggle') { sfxOn = !sfxOn; if (sfxOn) sfx('click'); render(); return; }
     if (act === 'bgmtoggle') { toggleBgm(); return; }
     if (act === 'deckguide') { showDeckGuide(ds.deck); return; }
+    if (act === 'deckedit') { openDeckEditor(ds.deck); return; }
+    if (act === 'deckeditadd') { deckEditAdjust(ds.card, 1); return; }
+    if (act === 'deckeditsub') { deckEditAdjust(ds.card, -1); return; }
+    if (act === 'deckeditreset') { deckEditReset(); return; }
+    if (act === 'deckeditsave') { deckEditSave(); return; }
     const G = E.GAME; if (!G) return;
     const human = G.current === viewer() && !G.players[G.current].isAI;
     // 開幕の布陣（自分のターンか否かに関わらず操作可）
@@ -1282,6 +1300,82 @@
     </div>`);
   }
 
+  // -------- デッキ編集（自家の武将＋無所属札のみ。他家の武将は選べない＝属性制約） --------
+  function openDeckEditor(deckId) {
+    const deck = DECKS[deckId]; if (!deck) return;
+    const counts = {}; deck.cards.forEach(id => counts[id] = (counts[id] || 0) + 1);
+    deckDraft = { deckId, counts };
+    renderDeckEditor();
+  }
+  function deckDraftTotal() { return Object.values(deckDraft.counts).reduce((a, n) => a + n, 0); }
+  function deckEditAdjust(cardId, diff) {
+    if (!deckDraft) return;
+    const cur = deckDraft.counts[cardId] || 0;
+    const next = cur + diff;
+    if (next < 0) return;
+    if (next > MAX_COPIES) { toast(`同じカードは${MAX_COPIES}枚までです`, true); return; }
+    if (diff > 0 && deckDraftTotal() >= DECK_SIZE) { toast(`デッキは${DECK_SIZE}枚までです`, true); return; }
+    if (next === 0) delete deckDraft.counts[cardId]; else deckDraft.counts[cardId] = next;
+    renderDeckEditor();
+  }
+  function renderDeckEditor() {
+    const deck = DECKS[deckDraft.deckId];
+    const legal = legalCardsFor(deck.faction);
+    const get = id => CARDS[id];
+    const pick = fn => legal.filter(id => fn(get(id)));
+    const sections = [
+      ['武将・たね（無名の兵士＝出世の起点／無所属で共通）', pick(c => c.type === 'warlord' && c.stage === 0)],
+      [`武将・侍大将（${esc(deck.faction)}家のみ選べます）`, pick(c => c.type === 'warlord' && c.stage === 1)],
+      ['装備（武将1人に1点）', pick(c => c.type === 'equip')],
+      ['軍需品（1ターンに何枚でも）', pick(c => c.type === 'trainer' && c.kind === 'item')],
+      ['軍師の采配（1ターンに1枚）', pick(c => c.type === 'trainer' && c.kind === 'support')],
+      ['陣形（場に1枚）', pick(c => c.type === 'stadium')],
+    ];
+    let rows = '';
+    sections.forEach(([title, list]) => {
+      if (!list.length) return;
+      rows += `<tr class="dg-sec"><td colspan="3">${esc(title)}</td></tr>`;
+      list.forEach(id => {
+        const c = get(id); const n = deckDraft.counts[id] || 0;
+        const eff = c.type === 'warlord' ? warlordEffShort(c) : esc(c.text || '');
+        rows += `<tr><td class="dg-n">${esc(c.name)}</td>
+          <td class="dg-c"><span class="dedit-ctl">
+            <button class="dedit-btn" data-act="deckeditsub" data-card="${id}" ${n <= 0 ? 'disabled' : ''}>－</button>
+            <b>${n}</b>
+            <button class="dedit-btn" data-act="deckeditadd" data-card="${id}" ${n >= MAX_COPIES ? 'disabled' : ''}>＋</button>
+          </span></td>
+          <td class="dg-e">${eff}</td></tr>`;
+      });
+    });
+    const total = deckDraftTotal();
+    const ready = total === DECK_SIZE;
+    overlay(`<div class="deckguide deckeditor">
+      <div class="ov-h">${esc(deck.name)} のデッキ編成　<span class="ov-sub ${ready ? '' : 'warn'}">${total}/${DECK_SIZE}枚</span></div>
+      <div class="ov-note">自由に入れ替えできます。<b>選べるのは${esc(deck.faction)}家の武将と無所属の共通札のみ</b>（他家の武将は世界観上、この家には入れられません）。同じカードは${MAX_COPIES}枚まで。大名は本陣の切り札としてデッキ外で自動的に付きます。</div>
+      <div class="dg-wrap"><table class="dg"><thead><tr><th>カード</th><th>枚数</th><th>効能</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="ov-foot">
+        <button class="btn ghost" data-act="deckeditreset">初期デッキに戻す</button>
+        <button class="btn ghost" data-act="closeoverlay">キャンセル</button>
+        <button class="btn big ${ready ? '' : 'dim'}" ${ready ? 'data-act="deckeditsave"' : ''}>この編成で決定</button>
+      </div>
+    </div>`);
+  }
+  function deckEditReset() {
+    const deck = DECKS[deckDraft.deckId];
+    const counts = {}; DEFAULT_DECK_CARDS[deckDraft.deckId].forEach(id => counts[id] = (counts[id] || 0) + 1);
+    deckDraft.counts = counts;
+    renderDeckEditor();
+  }
+  function deckEditSave() {
+    if (deckDraftTotal() !== DECK_SIZE) { toast(`デッキは${DECK_SIZE}枚ちょうどにしてください`, true); return; }
+    const cards = [];
+    Object.keys(deckDraft.counts).forEach(id => { for (let k = 0; k < deckDraft.counts[id]; k++) cards.push(id); });
+    DECKS[deckDraft.deckId].cards = cards;
+    deckDraft = null;
+    toast('デッキ編成を保存しました');
+    hideOverlay(); render();
+  }
+
   function showStart() {
     const decks = ['oda', 'takeda', 'uesugi', 'tokugawa', 'toyotomi'];
     const modes = [['cpu', '対CPU', 'AI軍師と一戦'], ['hotseat', '1人二役', '1台で両陣営を操作']];
@@ -1302,12 +1396,12 @@
         <div class="pickside">
           <div class="pick-label label">② ${p1who}の家</div>
           <div class="deckcol">${col('setp1', startP1)}</div>
-          <button class="btn ghost sm" data-act="deckguide" data-deck="${startP1}">${esc(DECKS[startP1].name)}の中身を見る</button>
+          <button class="btn ghost sm" data-act="deckedit" data-deck="${startP1}">${esc(DECKS[startP1].name)}のデッキ編成</button>
         </div>
         <div class="pickside">
           <div class="pick-label label">③ ${p2who}の家</div>
           <div class="deckcol">${col('setp2', startP2)}</div>
-          <button class="btn ghost sm" data-act="deckguide" data-deck="${startP2}">${esc(DECKS[startP2].name)}の中身を見る</button>
+          <button class="btn ghost sm" data-act="deckedit" data-deck="${startP2}">${esc(DECKS[startP2].name)}のデッキ編成</button>
         </div>
       </div>
       <div class="start-foot">

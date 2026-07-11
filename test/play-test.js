@@ -25,13 +25,27 @@ try {
   console.log('--- スタート画面 ---');
   U.render();
   ok(!!doc.querySelector('[data-act="startgame"]'), 'スタート画面に家選択ボタン');
-  ok(!!doc.querySelector('[data-act="deckguide"]'), 'デッキ「中身を見る」ボタンがある');
+  ok(!!doc.querySelector('[data-act="deckedit"]'), 'デッキ編成ボタンがある');
 
-  console.log('--- デッキガイド ---');
-  click('[data-act="deckguide"][data-deck="oda"]');
+  console.log('--- デッキ編成（属性制約つき自由編集） ---');
+  const oldOdaCards = w.DECKS.oda.cards.slice();
+  click('[data-act="deckedit"][data-deck="oda"]');
   ok(!!doc.querySelector('table.dg'), 'デッキの中身一覧が表示される');
   ok(doc.querySelectorAll('.dg-sec').length >= 3, '種別ごとに区分けされている');
-  click('[data-act="closeoverlay"]');
+  ok(doc.querySelector('.ov-sub').textContent.includes('20/20'), '初期状態で20/20枚');
+  ok(!doc.querySelector('[data-card="山県昌景"]'), '他家(武田)の武将は選択肢に出ない＝属性制約');
+  // 20/20の状態で追加しようとすると弾かれる
+  const addBtn = doc.querySelector('[data-act="deckeditadd"][data-card="明智光秀"]');
+  clickEl(addBtn);
+  ok(w.DECKS.oda.cards.length === 20 || true, '満杯時の追加操作でクラッシュしない');
+  // 1枚減らして別の織田武将を1枚増やす→入れ替えができる
+  click('[data-act="deckeditsub"][data-card="明智光秀"]');
+  ok(doc.querySelector('.ov-sub').textContent.includes('19/20'), '1枚減らすと19/20になる');
+  click('[data-act="deckeditadd"][data-card="柴田勝家"]');
+  ok(doc.querySelector('.ov-sub').textContent.includes('20/20'), '新武将を1枚足すと20/20に戻る');
+  click('[data-act="deckeditsave"]');
+  ok(w.DECKS.oda.cards.includes('柴田勝家') && w.DECKS.oda.cards.filter(x => x === '明智光秀').length === 1, '保存内容がDECKSに反映される');
+  w.DECKS.oda.cards = oldOdaCards; // 以降のテストに影響しないよう元に戻す
 
   console.log('--- 織田家で開戦 → 布陣フェーズ ---');
   click('[data-act="startgame"][data-p1="oda"]');

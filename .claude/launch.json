@@ -4,8 +4,8 @@
     {
       "name": "static-server",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["test/nocache-server.py", "8781"],
-      "port": 8781
+      "runtimeArgs": ["test/nocache-server.py", "8790"],
+      "port": 8790
     }
   ]
 }

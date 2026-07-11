@@ -100,6 +100,30 @@
       learn:{ title:'深く調査する', practice:'答えを急がず、情報源を広げて確度を上げる。', real:'未知の領域、比較、根拠が必要な判断では深い調査を先に置く。' },
       subs:[ {name:'敵将を分析', worktree:true}, {name:'兵站線を洗う', worktree:true}, {name:'弱点を統合', worktree:false} ],
     },
+    {
+      id:'hooks', cmd:'/hooks', name:'伏兵の号令', category:'防御', icon:'伏',
+      contextCost:18, turns:2, agentType:'万能侍大将',
+      desc:'あらかじめ伏兵を仕込んでおく。完成後、相手が次に先鋒で攻撃してきたとき、1度だけ25の反撃ダメージ。',
+      effect:{ kind:'counterTrap', amount:25 },
+      learn:{ title:'フックを仕込む', practice:'イベントに反応する仕掛けを先に置いておく。', real:'PreToolUse/PostToolUseのhookで、危険な操作を自動的に止めたり記録したりできる。' },
+      subs:[ {name:'罠を仕込む', worktree:true} ],
+    },
+    {
+      id:'yolo', cmd:'--dangerously-skip-permissions', name:'捨て身の一撃', category:'攻撃', icon:'捨',
+      contextCost:22, turns:2, agentType:'万能侍大将',
+      desc:'確認を全て飛ばし、強引に押し切る。完成すると相手の先鋒に70の大ダメージ。ただし無理がたたり、自分の先鋒も25のダメージを受ける。',
+      effect:{ kind:'recklessStrike', amount:70, selfDamage:25 },
+      learn:{ title:'安全確認を飛ばす代償を知る', practice:'速さのために確認を飛ばせば、事故った時の被害も自分に返る。', real:'--dangerously-skip-permissionsは強力だが、暴走のリスクも自分で引き受ける諸刃の剣。' },
+      subs:[ {name:'確認を飛ばして強行', worktree:false} ],
+    },
+    {
+      id:'resume', cmd:'/resume', name:'再起の号令', category:'兵站', icon:'蘇',
+      contextCost:16, turns:2, agentType:'軍師付き調役',
+      desc:'途絶えた戦列を呼び戻す。完成すると、討死した武将を1体（優先して侍大将を）手札に呼び戻す。',
+      effect:{ kind:'revive' },
+      learn:{ title:'中断した所から再開する', practice:'一度失った文脈でも、続きから立て直せる。', real:'claude --resumeで、過去のセッションを呼び戻して続きから作業できる。' },
+      subs:[ {name:'過去の記録を辿る', worktree:true} ],
+    },
   ];
 
   // カテゴリ色（UIバッジ用）

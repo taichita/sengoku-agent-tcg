@@ -73,6 +73,68 @@
     moves:[{name:'算段撃ち', cost:1, dmg:30, text:''},{name:'奉行の火線', cost:2, dmg:75, text:'相手の後備え1体に15。', effect:{benchTarget:15}}], weakness:'徳川', retreat:2, kubi:2,
     art:'art/images/mitsunari.png', flavor:'戦は数と段取り。兵站を読み切る理の将。' };
 
+  // ---------- 侍大将（増員・2026-07-11追加） ----------
+  C['柴田勝家'] = { id:'柴田勝家', type:'warlord', name:'柴田勝家', yomi:'しばた かついえ', rank:'侍大将', stage:1, evolvesFrom:'足軽', faction:'織田', heisyu:'歩',
+    hp:145, ability:{name:'鬼柴田', text:'この武将の兵力が半分以下のとき、ワザのダメージ+20。', type:'passive'},
+    moves:[{name:'瓶割り', cost:1, dmg:32, text:''},{name:'鬼柴田の突撃', cost:2, dmg:78, text:''}], weakness:'豊臣', retreat:2, kubi:2,
+    art:null, flavor:'退くを知らぬ猛将。されど賤ヶ岳に散る。' };
+  C['丹羽長秀'] = { id:'丹羽長秀', type:'warlord', name:'丹羽長秀', yomi:'にわ ながひで', rank:'侍大将', stage:1, evolvesFrom:'槍足軽', faction:'織田', heisyu:'槍',
+    hp:140, ability:null,
+    moves:[{name:'支え槍', cost:1, dmg:30, text:''},{name:'五郎左の采配', cost:2, dmg:72, text:''}], weakness:'豊臣', retreat:2, kubi:2,
+    art:null, flavor:'米のように欠かせぬ男、と信長評す。' };
+  C['前田利家'] = { id:'前田利家', type:'warlord', name:'前田利家', yomi:'まえだ としいえ', rank:'侍大将', stage:1, evolvesFrom:'槍足軽', faction:'織田', heisyu:'槍',
+    hp:135, ability:null,
+    moves:[{name:'又左の一突き', cost:1, dmg:35, text:''},{name:'槍の又左', cost:2, dmg:82, text:''}], weakness:'豊臣', retreat:1, kubi:2,
+    art:null, flavor:'槍働きの又左、天下に聞こえた男。' };
+  C['内藤昌豊'] = { id:'内藤昌豊', type:'warlord', name:'内藤昌豊', yomi:'ないとう まさとよ', rank:'侍大将', stage:1, evolvesFrom:'槍足軽', faction:'武田', heisyu:'槍',
+    hp:145, ability:{name:'不敗の勇将', text:'自分のターン開始時、この武将のダメージを15回復する。', type:'passive'},
+    moves:[{name:'隠れ武士', cost:1, dmg:30, text:''},{name:'昌豊の采配', cost:2, dmg:75, text:''}], weakness:'織田', retreat:2, kubi:2,
+    art:null, flavor:'一度も後れを取らぬ、と称された武田の柱石。' };
+  C['高坂昌信'] = { id:'高坂昌信', type:'warlord', name:'高坂昌信', yomi:'こうさか まさのぶ', rank:'侍大将', stage:1, evolvesFrom:'弓兵', faction:'武田', heisyu:'弓',
+    hp:135, ability:null,
+    moves:[{name:'海津の備え', cost:1, dmg:28, text:'相手の後備え1体に15。', effect:{benchTarget:15}},{name:'甲陽の軍配', cost:2, dmg:75, text:''}], weakness:'織田', retreat:1, kubi:2,
+    art:null, flavor:'越後を睨み、海津城を守り抜いた智将。' };
+  C['真田幸隆'] = { id:'真田幸隆', type:'warlord', name:'真田幸隆', yomi:'さなだ ゆきたか', rank:'侍大将', stage:1, evolvesFrom:'弓兵', faction:'武田', heisyu:'弓',
+    hp:125, ability:null,
+    moves:[{name:'調略の一手', cost:1, dmg:28, text:''},{name:'攻め弾正', cost:2, dmg:78, text:'相手の後備え1体に15。', effect:{benchTarget:15}}], weakness:'織田', retreat:2, kubi:2,
+    art:null, flavor:'謀は敵より我が方に利あり。攻め弾正、その智謀。' };
+  C['前田慶次'] = { id:'前田慶次', type:'warlord', name:'前田慶次', yomi:'まえだ けいじ', rank:'侍大将', stage:1, evolvesFrom:'槍足軽', faction:'上杉', heisyu:'槍',
+    hp:140, ability:null,
+    moves:[{name:'傾奇の一撃', cost:1, dmg:33, text:''},{name:'大ふへん者', cost:2, dmg:80, text:''}], weakness:'武田', retreat:1, kubi:2,
+    art:null, flavor:'天下御免の傾奇者。義に生き、伊達に生きる。' };
+  C['柿崎景家'] = { id:'柿崎景家', type:'warlord', name:'柿崎景家', yomi:'かきざき かげいえ', rank:'侍大将', stage:1, evolvesFrom:'槍足軽', faction:'上杉', heisyu:'槍',
+    hp:145, ability:null,
+    moves:[{name:'猛虎の一番槍', cost:1, dmg:35, text:''},{name:'景家の突撃', cost:2, dmg:85, text:''}], weakness:'武田', retreat:2, kubi:2,
+    art:null, flavor:'越後の猛虎、常に軍の先頭に立つ。' };
+  C['斎藤朝信'] = { id:'斎藤朝信', type:'warlord', name:'斎藤朝信', yomi:'さいとう とものぶ', rank:'侍大将', stage:1, evolvesFrom:'弓兵', faction:'上杉', heisyu:'弓',
+    hp:130, ability:{name:'越後の鍾馗', text:'自分のターン開始時、この武将のダメージを15回復する。', type:'passive'},
+    moves:[{name:'鍾馗の守り', cost:1, dmg:28, text:'相手の後備え1体に15。', effect:{benchTarget:15}},{name:'朝信の一矢', cost:2, dmg:72, text:''}], weakness:'武田', retreat:1, kubi:2,
+    art:null, flavor:'越後の鍾馗と恐れられた、不敗の守将。' };
+  C['井伊直政'] = { id:'井伊直政', type:'warlord', name:'井伊直政', yomi:'いい なおまさ', rank:'侍大将', stage:1, evolvesFrom:'槍足軽', faction:'徳川', heisyu:'槍',
+    hp:140, ability:null,
+    moves:[{name:'赤鬼の一閃', cost:1, dmg:36, text:''},{name:'井伊の赤備え', cost:2, dmg:88, text:''}], weakness:'上杉', retreat:2, kubi:2,
+    art:null, flavor:'井伊の赤鬼、朱に染まりし精鋭を率いる。' };
+  C['榊原康政'] = { id:'榊原康政', type:'warlord', name:'榊原康政', yomi:'さかきばら やすまさ', rank:'侍大将', stage:1, evolvesFrom:'弓兵', faction:'徳川', heisyu:'弓',
+    hp:130, ability:{name:'三河武士の統率', text:'自分のターン開始時、兵站庫に兵糧を1多くためる。', type:'passive'},
+    moves:[{name:'康政の備え', cost:1, dmg:28, text:''},{name:'三河武士の意地', cost:2, dmg:74, text:''}], weakness:'上杉', retreat:1, kubi:2,
+    art:null, flavor:'筆を執っては檄文、槍を執っては武功。' };
+  C['酒井忠次'] = { id:'酒井忠次', type:'warlord', name:'酒井忠次', yomi:'さかい ただつぐ', rank:'侍大将', stage:1, evolvesFrom:'鉄砲足軽', faction:'徳川', heisyu:'砲',
+    hp:135, ability:null,
+    moves:[{name:'忠次の采配', cost:1, dmg:30, text:''},{name:'東三河の旗頭', cost:2, dmg:74, text:'相手の後備え1体に10。', effect:{benchTarget:10}}], weakness:'上杉', retreat:2, kubi:2,
+    art:null, flavor:'徳川家中随一の宿老、その旗の下に兵集う。' };
+  C['加藤清正'] = { id:'加藤清正', type:'warlord', name:'加藤清正', yomi:'かとう きよまさ', rank:'侍大将', stage:1, evolvesFrom:'足軽', faction:'豊臣', heisyu:'歩',
+    hp:145, ability:null,
+    moves:[{name:'虎退治', cost:1, dmg:35, text:''},{name:'清正の一番槍', cost:2, dmg:85, text:''}], weakness:'徳川', retreat:2, kubi:2,
+    art:null, flavor:'虎をも恐れぬ豪傑。賤ヶ岳の七本槍、その一人。' };
+  C['福島正則'] = { id:'福島正則', type:'warlord', name:'福島正則', yomi:'ふくしま まさのり', rank:'侍大将', stage:1, evolvesFrom:'足軽', faction:'豊臣', heisyu:'歩',
+    hp:140, ability:null,
+    moves:[{name:'猪武者', cost:1, dmg:35, text:''},{name:'正則の豪傑', cost:2, dmg:82, text:''}], weakness:'徳川', retreat:1, kubi:2,
+    art:null, flavor:'酒と武勇を好む猪武者。前線で吠える。' };
+  C['黒田官兵衛'] = { id:'黒田官兵衛', type:'warlord', name:'黒田官兵衛', yomi:'くろだ かんべえ', rank:'侍大将', stage:1, evolvesFrom:'鉄砲足軽', faction:'豊臣', heisyu:'砲',
+    hp:120, ability:{name:'軍師官兵衛', text:'自分のターン開始時、コンテキスト予算を3多く回復する。', type:'passive'},
+    moves:[{name:'播磨の智謀', cost:1, dmg:25, text:'相手の後備え1体に15。', effect:{benchTarget:15}},{name:'二兵衛の号令', cost:2, dmg:65, text:''}], weakness:'徳川', retreat:2, kubi:2,
+    art:null, flavor:'如水と号す、天下無双の軍師。この采配、信長・秀吉すら恐れた。' };
+
   // ---------- 大名 ----------
   C['織田信長'] = { id:'織田信長', type:'warlord', name:'織田信長', yomi:'おだ のぶなが', rank:'大名', stage:2, daimyo:true, evolvesFrom:null, faction:'織田', heisyu:'歩', legend:true,
     hp:180, ability:{name:'第六天魔王', text:'出陣している間、自分の番の終わりに相手の先鋒へ25のダメージ。', type:'passive'},

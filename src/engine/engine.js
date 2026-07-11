@@ -46,7 +46,7 @@
       daimyoFallen: false, warlordsLost: 0,
       energy: 0, context: 100, contextMax: 100,
       kubi: 0, parallelMax: 2, tasks: [], noAgent: false,
-      buffs: { nextAttack: 0, allAtk: 0, speedUp: false, shield: 0, planActive: false },
+      buffs: { nextAttack: 0, allAtk: 0, speedUp: false, shield: 0, planActive: false, counterTrap: 0 },
       supportUsed: false, retreated: false, stadiumUsed: false,
       firstTurnTaken: false,
     };
@@ -177,9 +177,10 @@
       if (!inst) return;
       const ab = inst.card.ability;
       if (!ab) return;
-      if (ab.name === '出世の才' || ab.name === '兵站奉行') p.energy += 1;
+      if (ab.name === '出世の才' || ab.name === '兵站奉行' || ab.name === '三河武士の統率') p.energy += 1;
       if (ab.name === '人たらし') p.context = clamp(p.context + 5, 0, p.contextMax);
-      if (ab.name === '愛の兜') inst.damage = Math.max(0, inst.damage - 15);
+      if (ab.name === '軍師官兵衛') p.context = clamp(p.context + 3, 0, p.contextMax);
+      if (ab.name === '愛の兜' || ab.name === '不敗の勇将' || ab.name === '越後の鍾馗') inst.damage = Math.max(0, inst.damage - 15);
     });
     p.supportUsed = false; p.retreated = false; p.stadiumUsed = false;
     // 金縛りは自分の番開始で解除予約（自番終了時に解除）。新規配置フラグ・兵糧補給フラグ解除
@@ -381,6 +382,21 @@
       case 'parallelUp': p.parallelMax += amt; msg += `並列上限が${p.parallelMax}に。`; break;
       case 'fullHeal': if (p.active) { p.active.damage = 0; msg += `${p.active.card.name}のダメージを全回復。`; } break;
       case 'speedUp': p.buffs.speedUp = true; msg += '以後、命令の進行が毎ターン2段階に。'; break;
+      case 'counterTrap': p.buffs.counterTrap += amt; msg += `伏兵の号令を敷いた。相手の次の攻撃に${amt}の反撃。`; break;
+      case 'recklessStrike':
+        if (opp.active) { dealRaw(opp.active, amt); msg += `相手先鋒に${amt}の大打撃`; }
+        if (p.active) { dealRaw(p.active, e.selfDamage || 0); msg += `、無理を押した自軍にも${e.selfDamage || 0}のダメージ。`; }
+        break;
+      case 'revive': {
+        let idx = p.discard.findIndex(inst => inst.card.type === 'warlord' && inst.card.stage === 1);
+        if (idx < 0) idx = p.discard.findIndex(inst => inst.card.type === 'warlord' && inst.card.stage === 0);
+        if (idx >= 0) {
+          const revived = makeInst(p.discard[idx].cardId);
+          p.discard.splice(idx, 1); p.hand.push(revived);
+          msg += `討死した${revived.card.name}を呼び戻し、手札に加えた。`;
+        } else { msg += 'だが、呼び戻せる兵はいなかった。'; }
+        break;
+      }
       default: break;
     }
     log(msg, p.id);
@@ -417,11 +433,17 @@
     // 攻撃で兵糧を消費（無限に撃てないように。1兵糧=兵糧1）
     a.energy = Math.max(0, a.energy - move.cost);
     log(`${a.card.name}の「${move.name}」！ ${opp.active ? opp.active.card.name : '相手'}に${dmg}のダメージ。（兵糧${move.cost}消費）`);
+    // 伏兵の号令：相手が仕掛けた罠。攻撃を受けると1回だけ反撃ダメージ
+    if (opp.buffs.counterTrap > 0) {
+      dealRaw(a, opp.buffs.counterTrap);
+      log(`伏兵の号令が発動！ ${a.card.name}に反撃${opp.buffs.counterTrap}のダメージ。`, opp.id);
+      opp.buffs.counterTrap = 0;
+    }
     // ワザ付随効果
     applyMoveEffect(p, opp, move);
     // バフ消費
     p.buffs.nextAttack = 0;
-    checkKO(opp); checkWin();
+    checkKO(opp); checkKO(p); checkWin();
     if (!G.GAME.winner) endTurnInternal();
     return ok();
   };
@@ -452,6 +474,7 @@
     if (a.card.ability) {
       if (a.card.ability.name === '毘沙門天' && coin()) dmg += 30;
       if (a.card.ability.name === '忍耐' && a.damage >= 100) dmg += 40;
+      if (a.card.ability.name === '鬼柴田' && a.damage >= a.card.hp / 2) dmg += 20;
     }
     return Math.max(0, dmg);
   }
@@ -683,7 +706,7 @@
   }
   function issueAICommands(p) {
     if (p.noAgent) return; // 対CPUのCPUは軍師なし（兵力で攻める）
-    const order = ['compact', 'plan', 'code-review', 'security-review', 'codex-exec', 'memory', 'deep-research', 'sandbox', 'agents'];
+    const order = ['compact', 'plan', 'code-review', 'security-review', 'codex-exec', 'memory', 'deep-research', 'sandbox', 'agents', 'hooks', 'yolo', 'resume'];
     for (const id of order) {
       if (p.tasks.length >= p.parallelMax) break;
       const cmd = COMMANDS.find(c => c.id === id);
