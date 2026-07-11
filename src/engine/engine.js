@@ -39,7 +39,7 @@
   function newPlayer(deckDef, isAI) {
     const deck = shuffle(deckDef.cards.map(makeInst));
     return {
-      id: null, name: deckDef.name, faction: deckDef.faction, isAI: !!isAI,
+      id: null, deckId: deckDef.id, name: deckDef.name, faction: deckDef.faction, isAI: !!isAI,
       deck, hand: [], discard: [],
       active: null, bench: [null, null, null],
       honjin: deckDef.daimyo ? makeInst(deckDef.daimyo) : null, // 本陣に控える大名（前線全滅で出陣）
@@ -317,6 +317,8 @@
     const p = G.cur();
     const cmd = COMMANDS.find(c => c.id === cmdId);
     if (!cmd) return fail('未知の命令です。');
+    const deck = DECKS[p.deckId];
+    if (deck && deck.commands && !deck.commands.includes(cmdId)) return fail('この命令は軍師秘伝の書に入っていません。');
     if (p.tasks.length >= p.parallelMax) return fail(`同時に走らせられる命令は${p.parallelMax}個までです（/agents で増やせます）。`);
     if (p.context < cmd.contextCost) return fail(`コンテキスト予算が足りません（必要${cmd.contextCost}・残${p.context}）。`);
     p.context -= cmd.contextCost;
@@ -706,7 +708,8 @@
   }
   function issueAICommands(p) {
     if (p.noAgent) return; // 対CPUのCPUは軍師なし（兵力で攻める）
-    const order = ['compact', 'plan', 'code-review', 'security-review', 'codex-exec', 'memory', 'deep-research', 'sandbox', 'agents', 'hooks', 'yolo', 'resume'];
+    const deck = DECKS[p.deckId];
+    const order = deck && deck.commands ? deck.commands : [];
     for (const id of order) {
       if (p.tasks.length >= p.parallelMax) break;
       const cmd = COMMANDS.find(c => c.id === id);

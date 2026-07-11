@@ -271,25 +271,35 @@
 .ov-note { font-size: 12px; color: var(--sumi3); margin-bottom: 12px; }
 .ov-foot { margin-top: 16px; text-align: right; }
 
-/* 命令メニュー */
-.cmdgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-.cmdcard { border: 1.5px solid var(--rule); border-left: 4px solid var(--cc); padding: 8px 10px; cursor: pointer; background: var(--washi); }
-.cmdcard:hover { background: var(--paper); }
-.cmdcard.cant { opacity: .42; cursor: default; }
-.cc-top { display: flex; justify-content: space-between; align-items: baseline; }
-.cc-cat { font-size: 9px; color: #fff; background: var(--cc); padding: 0 5px; }
-.cc-cmd { font-family: var(--num); font-weight: 700; font-size: 12px; color: var(--cc); }
-.cc-name { font-size: 16px; font-weight: 900; margin: 2px 0; }
-.cc-desc { font-size: 11px; color: var(--sumi2); line-height: 1.4; min-height: 44px; }
+/* 軍師秘伝の書（命令メニュー）：コマンドライン入力＋コンパクトな一覧 */
+.cmd-filter { width: 100%; box-sizing: border-box; font-family: var(--num); font-size: 14px; padding: 8px 10px; margin: 8px 0; border: 1.5px solid var(--rule); background: var(--washi); color: var(--sumi); }
+.cmd-filter:focus { outline: 2px solid var(--shu); outline-offset: -1px; }
+.cmdlist { max-height: 46vh; overflow-y: auto; border: 1px solid var(--rule-soft); }
+.cmdrow-empty { padding: 14px; text-align: center; color: var(--mute); font-size: 12px; }
+.cmdrow { border-bottom: 1px solid var(--rule-soft); border-left: 3px solid var(--cc); background: var(--washi); }
+.cmdrow.picked { background: var(--shu-soft); }
+.cmdrow-head { display: flex; align-items: center; gap: 8px; padding: 7px 10px; cursor: pointer; }
+.cmdrow-head:hover { background: var(--paper); }
+.cc-cmd { font-family: var(--num); font-weight: 700; font-size: 12px; color: var(--cc); white-space: nowrap; }
+.cc-name { font-size: 13px; font-weight: 900; flex: 1; min-width: 0; }
+.cc-cost { font-family: var(--num); font-size: 11px; color: var(--mute); white-space: nowrap; }
+.cc-check { font-size: 11px; font-weight: 700; color: var(--shu); }
+.cc-desc { font-size: 11px; color: var(--sumi2); line-height: 1.4; }
 .cc-eff { font-size: 11px; font-weight: 700; color: var(--cc); background: var(--washi-d); padding: 2px 6px; margin: 3px 0; border-left: 3px solid var(--cc); }
 .cc-learn { font-size: 10.5px; line-height: 1.35; color: var(--ai); background: rgba(30, 70, 117, .08); padding: 3px 6px; margin: 3px 0; border-left: 3px solid var(--ai); }
 .cc-foot { display: flex; justify-content: space-between; font-size: 10px; color: var(--mute); border-top: 1px solid var(--rule-soft); margin-top: 5px; padding-top: 4px; }
-.cmdcard.picked { background: var(--shu-soft); border-color: var(--shu); border-left-color: var(--shu); }
-.cmdcard.picked:hover { background: var(--shu-soft); }
-.cc-check { float: right; font-size: 10px; font-weight: 700; color: var(--shu); }
+.cmdrow-detail { padding: 6px 10px 10px; border-top: 1px dashed var(--rule-soft); }
+.cmdrow-detail .btn { margin-top: 6px; }
 .cmd-cart { margin-top: 12px; font-size: 13px; color: var(--ai); border-top: 1px dotted var(--rule-soft); padding-top: 8px; }
 .cmd-cart b { font-family: var(--num); }
 .btn.dim { opacity: .4; cursor: default; }
+.btn.sm { font-size: 12px; padding: 5px 10px; }
+
+/* デッキ編集：タブ切り替え／命令選択リスト */
+.dtabs { display: flex; gap: 6px; margin: 8px 0; border-bottom: 1.5px solid var(--rule); }
+.dtab { border: 1px solid var(--rule); border-bottom: none; background: var(--washi-d); color: var(--sumi3); padding: 6px 14px; cursor: pointer; font-size: 13px; font-weight: 700; }
+.dtab.on { background: var(--washi); color: var(--sumi); border-color: var(--shu); }
+.deckcmdlist .cmdrow { cursor: pointer; }
 .ov-foot .btn { margin-left: 8px; }
 
 /* スタート画面 */

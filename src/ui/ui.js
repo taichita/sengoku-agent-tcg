@@ -13,10 +13,13 @@
   let startP1 = 'oda', startP2 = 'takeda'; // スタート画面で選択中の家
   let root, panelEl, toastTimer;
   let cmdCart = [];       // 命令メニューで選択中の命令id（まとめて発令する）
-  let deckDraft = null;   // デッキ編集中の作業用データ {deckId, counts:{cardId:枚数}}
+  let cmdFilter = '';     // 軍師秘伝の書：コマンドライン入力欄の絞り込み文字
+  let cmdExpanded = null; // 軍師秘伝の書：詳細を開いている命令id（1つだけ）
+  let deckDraft = null;   // デッキ編集中の作業用データ {deckId, counts:{cardId:枚数}, commands:[id,...]}
   const DEFAULT_DECK_CARDS = {}; // 初期デッキ（「初期に戻す」用に起動時のみ複製して保持）
-  Object.keys(DECKS).forEach(id => { DEFAULT_DECK_CARDS[id] = DECKS[id].cards.slice(); });
-  const DECK_SIZE = 20, MAX_COPIES = 3;
+  const DEFAULT_DECK_COMMANDS = {};
+  Object.keys(DECKS).forEach(id => { DEFAULT_DECK_CARDS[id] = DECKS[id].cards.slice(); DEFAULT_DECK_COMMANDS[id] = DECKS[id].commands.slice(); });
+  const DECK_SIZE = 20, MAX_COPIES = 3, MAX_COMMANDS = 8;
 
   // このデッキ（家）に入れられるカード一覧＝無所属の共通札＋自家の武将のみ（他家の武将は入れられない＝属性制約）
   function legalCardsFor(faction) {
@@ -377,6 +380,7 @@
     root = document.getElementById('app');
     E.onChange = render;
     document.addEventListener('click', onClick);
+    document.addEventListener('input', onInput);
     document.addEventListener('dragstart', onDragStart);
     document.addEventListener('dragover', onDragOver);
     document.addEventListener('drop', onDrop);
@@ -426,6 +430,8 @@
     if (act === 'deckeditsub') { deckEditAdjust(ds.card, -1); return; }
     if (act === 'deckeditreset') { deckEditReset(); return; }
     if (act === 'deckeditsave') { deckEditSave(); return; }
+    if (act === 'deckedittab') { switchDeckEditTab(ds.tab); return; }
+    if (act === 'deckeditcmdtoggle') { deckEditCmdToggle(ds.cmd); return; }
     const G = E.GAME; if (!G) return;
     const human = G.current === viewer() && !G.players[G.current].isAI;
     // 開幕の布陣（自分のターンか否かに関わらず操作可）
@@ -434,6 +440,7 @@
     if (act === 'confirmSetup') { const r = E.confirmSetup(); if (!r.ok) toast(r.msg, true); else render(); return; } // 次の布陣者がいれば render が布陣画面を再表示、開戦なら盤面へ
     if (act === 'cmdmenu') { cmdCart = []; openCmdMenu(); return; }
     if (act === 'cmdtoggle') { toggleCmd(ds.id); return; }
+    if (act === 'cmdrowtoggle') { toggleCmdExpand(ds.id); return; }
     if (act === 'cmdclear') { cmdCart = []; renderCmdMenu(); return; }
     if (act === 'cmdissue') { issueCart(); return; }
     if (act === 'promote') { do_(E.choosePromote(ds.uid)); hideOverlay(); render(); return; } // 繰り上げ選択（自分の番以外でも自陣の決定）
@@ -468,6 +475,23 @@
   }
 
   function do_(r) { if (r && !r.ok) toast(r.msg, true); else if (r && r.msg) toast(r.msg); }
+
+  // 軍師秘伝の書の絞り込み欄：一覧部分だけ差し替えて入力中のフォーカス/カーソル位置を保つ（overlay全体は再描画しない）
+  function onInput(ev) {
+    if (ev.target && ev.target.id === 'cmdFilterInput') {
+      cmdFilter = ev.target.value;
+      const p = E.cur();
+      const ctxLeft = p.context - cartCost();
+      const slotsLeft = p.parallelMax - p.tasks.length - cmdCart.length;
+      const q = cmdFilter.trim().toLowerCase();
+      const all = cmdLoadout();
+      const list = q ? all.filter(cmd => cmd.cmd.toLowerCase().includes(q) || cmd.name.toLowerCase().includes(q) || cmd.id.toLowerCase().includes(q)) : all;
+      const area = document.getElementById('cmdListArea');
+      if (area) area.innerHTML = renderCmdRows(list, p, ctxLeft, slotsLeft);
+    } else if (ev.target && ev.target.id === 'deckCmdFilterInput') {
+      onDeckCmdFilterInput(ev.target.value);
+    }
+  }
 
   function canUseEnergyReserve() {
     const G = E.GAME;
@@ -1070,6 +1094,9 @@
       case 'parallelUp': return `命令の並列上限 +${a}`;
       case 'fullHeal': return `先鋒の兵力を全回復`;
       case 'speedUp': return `以後 命令が毎ターン2倍進行`;
+      case 'counterTrap': return `相手の次の攻撃に反撃 ${a}`;
+      case 'recklessStrike': return `相手先鋒に ${a}（自分も ${e.selfDamage || 0} 被弾）`;
+      case 'revive': return `討死した武将を1体呼び戻す`;
       default: return cmd.name;
     }
   }
@@ -1082,7 +1109,15 @@
     const G = E.GAME; const p = E.cur();
     if (G.current !== viewer() || G.players[G.current].isAI) { toast('自分の番に発注できます', true); return; }
     if (p.noAgent) { toast('この陣営に軍師はいません（兵力で攻めます）', true); return; }
+    cmdFilter = ''; cmdExpanded = null;
     renderCmdMenu();
+  }
+
+  // このデッキ（家）の「軍師秘伝の書」＝発注できる命令の一覧（デッキ編成画面で選んだ最大8種）
+  function cmdLoadout() {
+    const p = E.cur(); const deck = DECKS[p.deckId];
+    const ids = (deck && deck.commands) || [];
+    return ids.map(cmdById).filter(Boolean);
   }
 
   function toggleCmd(id) {
@@ -1094,6 +1129,11 @@
     cmdCart.push(id); renderCmdMenu();
   }
 
+  function toggleCmdExpand(id) {
+    cmdExpanded = (cmdExpanded === id) ? null : id;
+    renderCmdMenu();
+  }
+
   function issueCart() {
     if (!cmdCart.length) return;
     const ids = cmdCart.slice(); cmdCart = [];
@@ -1103,33 +1143,22 @@
     if (n) toast(`${n}件の命令をまとめて発令。家臣が動き出した。`);
   }
 
+  // 軍師秘伝の書：コスト・名前だけのコンパクトな行。クリックで詳細を開閉、絞り込み欄で入力中の文字にマッチする命令だけ表示。
   function renderCmdMenu() {
     const p = E.cur();
     const ctxLeft = p.context - cartCost();
     const slotsLeft = p.parallelMax - p.tasks.length - cmdCart.length;
-    const cards = COMMANDS.map(cmd => {
-      const inCart = cmdCart.includes(cmd.id);
-      const canAdd = !inCart && slotsLeft > 0 && ctxLeft >= cmd.contextCost;
-      const cc = CATEGORY_COLOR[cmd.category] || 'var(--sumi)';
-      const cls = inCart ? 'picked' : (canAdd ? '' : 'cant');
-      const clickable = inCart || canAdd;
-      return `<div class="cmdcard ${cls}" ${clickable ? `data-act="cmdtoggle" data-id="${cmd.id}"` : ''} style="--cc:${cc}">
-        ${inCart ? '<span class="cc-check">✓ 選択中</span>' : ''}
-        <div class="cc-top"><span class="cc-cat label">${esc(cmd.category)}</span><span class="cc-cmd">${esc(cmd.cmd)}</span></div>
-        <div class="cc-name">${esc(cmd.name)}</div>
-        <div class="cc-eff">効果：${esc(effSummary(cmd))}</div>
-        ${cmd.learn ? `<div class="cc-learn">学び：${esc(learnSummary(cmd))}</div>` : ''}
-        <div class="cc-desc">${esc(cmd.desc)}</div>
-        <div class="cc-foot"><span>脳容量 ${cmd.contextCost}</span><span>完成まで${cmd.turns}手番</span><span>${esc(cmd.agentType)}</span></div>
-      </div>`;
-    }).join('');
+    const q = cmdFilter.trim().toLowerCase();
+    const all = cmdLoadout();
+    const list = q ? all.filter(cmd => cmd.cmd.toLowerCase().includes(q) || cmd.name.toLowerCase().includes(q) || cmd.id.toLowerCase().includes(q)) : all;
     const cartLine = cmdCart.length
       ? `選択 <b>${cmdCart.length}</b> 件 ／ 消費 脳容量 <b>${cartCost()}</b>（発令後の残り ${ctxLeft}）・並列 ${p.tasks.length + cmdCart.length}/${p.parallelMax}`
-      : `命令はまとめて選べます。脳容量 ${p.context}/${p.contextMax}・並列の空き ${slotsLeft} 枠`;
+      : `脳容量 ${p.context}/${p.contextMax}・並列の空き ${slotsLeft} 枠`;
     overlay(`<div class="cmdmenu">
-      <div class="ov-h">軍師の命令メニュー　<span class="ov-sub">脳容量 ${p.context}/${p.contextMax}・並列 ${p.tasks.length}/${p.parallelMax}</span></div>
-      <div class="ov-note">本物の Claude Code / Codex のコマンドです。<b>複数選んでまとめて発令</b>できます（クリックで選択／もう一度クリックで解除）。発注すると数手番かけて完成し、戦況に効きます。</div>
-      <div class="cmdgrid">${cards}</div>
+      <div class="ov-h">軍師秘伝の書　<span class="ov-sub">脳容量 ${p.context}/${p.contextMax}・並列 ${p.tasks.length}/${p.parallelMax}</span></div>
+      <div class="ov-note">本物の Claude Code / Codex のコマンドです。入力欄で絞り込み、行をクリックすると詳細と選択ボタンが開きます。<b>複数選んでまとめて発令</b>できます。</div>
+      <input type="text" id="cmdFilterInput" class="cmd-filter" placeholder="コマンドを入力して絞り込み（例: /plan、圧縮）" value="${esc(cmdFilter)}" autocomplete="off" spellcheck="false">
+      <div class="cmdlist" id="cmdListArea">${renderCmdRows(list, p, ctxLeft, slotsLeft)}</div>
       <div class="cmd-cart">${cartLine}</div>
       <div class="ov-foot">
         <button class="btn ghost" data-act="cmdclear">選択を消す</button>
@@ -1137,6 +1166,31 @@
         <button class="btn ghost" data-act="closeoverlay">閉じる</button>
       </div>
     </div>`);
+  }
+
+  function renderCmdRows(list, p, ctxLeft, slotsLeft) {
+    if (!list.length) return `<div class="cmdrow-empty">該当する命令がありません。</div>`;
+    return list.map(cmd => {
+      const inCart = cmdCart.includes(cmd.id);
+      const canAdd = !inCart && slotsLeft > 0 && ctxLeft >= cmd.contextCost;
+      const cc = CATEGORY_COLOR[cmd.category] || 'var(--sumi)';
+      const open = cmdExpanded === cmd.id;
+      const detail = open ? `
+        <div class="cmdrow-detail">
+          <div class="cc-eff">効果：${esc(effSummary(cmd))}</div>
+          ${cmd.learn ? `<div class="cc-learn">学び：${esc(learnSummary(cmd))}</div>` : ''}
+          <div class="cc-desc">${esc(cmd.desc)}</div>
+          <div class="cc-foot"><span>脳容量 ${cmd.contextCost}</span><span>完成まで${cmd.turns}手番</span><span>${esc(cmd.agentType)}</span></div>
+          <button class="btn sm ${inCart ? 'cmd' : ''} ${(!inCart && !canAdd) ? 'dim' : ''}" ${(inCart || canAdd) ? `data-act="cmdtoggle" data-id="${cmd.id}"` : ''}>${inCart ? '✓ 選択中（解除する）' : '発注リストに加える'}</button>
+        </div>` : '';
+      return `<div class="cmdrow ${open ? 'open' : ''} ${inCart ? 'picked' : ''}" style="--cc:${cc}">
+        <div class="cmdrow-head" data-act="cmdrowtoggle" data-id="${cmd.id}">
+          <span class="cc-cmd">${esc(cmd.cmd)}</span><span class="cc-name">${esc(cmd.name)}</span>
+          <span class="cc-cost">脳${cmd.contextCost}</span>${inCart ? '<span class="cc-check">✓</span>' : ''}
+        </div>
+        ${detail}
+      </div>`;
+    }).join('');
   }
 
   // -------- オーバーレイ共通 --------
@@ -1304,9 +1358,10 @@
   function openDeckEditor(deckId) {
     const deck = DECKS[deckId]; if (!deck) return;
     const counts = {}; deck.cards.forEach(id => counts[id] = (counts[id] || 0) + 1);
-    deckDraft = { deckId, counts };
+    deckDraft = { deckId, counts, commands: deck.commands.slice(), tab: 'cards', cmdFilter: '' };
     renderDeckEditor();
   }
+  function switchDeckEditTab(tab) { deckDraft.tab = tab; renderDeckEditor(); }
   function deckDraftTotal() { return Object.values(deckDraft.counts).reduce((a, n) => a + n, 0); }
   function deckEditAdjust(cardId, diff) {
     if (!deckDraft) return;
@@ -1318,41 +1373,82 @@
     if (next === 0) delete deckDraft.counts[cardId]; else deckDraft.counts[cardId] = next;
     renderDeckEditor();
   }
+  function deckEditCmdToggle(id) {
+    const i = deckDraft.commands.indexOf(id);
+    if (i >= 0) { deckDraft.commands.splice(i, 1); renderDeckEditor(); return; }
+    if (deckDraft.commands.length >= MAX_COMMANDS) { toast(`軍師秘伝の書に入れられる命令は${MAX_COMMANDS}種までです`, true); return; }
+    deckDraft.commands.push(id);
+    renderDeckEditor();
+  }
+  function onDeckCmdFilterInput(value) {
+    deckDraft.cmdFilter = value;
+    const area = document.getElementById('deckCmdListArea');
+    if (area) area.innerHTML = renderDeckCmdRows();
+  }
+  function renderDeckCmdRows() {
+    const q = (deckDraft.cmdFilter || '').trim().toLowerCase();
+    const list = q ? COMMANDS.filter(c => c.cmd.toLowerCase().includes(q) || c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q)) : COMMANDS;
+    if (!list.length) return `<div class="cmdrow-empty">該当する命令がありません。</div>`;
+    return list.map(cmd => {
+      const on = deckDraft.commands.includes(cmd.id);
+      const cc = CATEGORY_COLOR[cmd.category] || 'var(--sumi)';
+      return `<div class="cmdrow deckcmd ${on ? 'picked' : ''}" style="--cc:${cc}" data-act="deckeditcmdtoggle" data-cmd="${cmd.id}" title="${esc(cmd.desc)}">
+        <div class="cmdrow-head">
+          <span class="cc-cmd">${esc(cmd.cmd)}</span><span class="cc-name">${esc(cmd.name)}</span>
+          <span class="cc-cost">脳${cmd.contextCost}</span>${on ? '<span class="cc-check">✓</span>' : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
   function renderDeckEditor() {
     const deck = DECKS[deckDraft.deckId];
-    const legal = legalCardsFor(deck.faction);
-    const get = id => CARDS[id];
-    const pick = fn => legal.filter(id => fn(get(id)));
-    const sections = [
-      ['武将・たね（無名の兵士＝出世の起点／無所属で共通）', pick(c => c.type === 'warlord' && c.stage === 0)],
-      [`武将・侍大将（${esc(deck.faction)}家のみ選べます）`, pick(c => c.type === 'warlord' && c.stage === 1)],
-      ['装備（武将1人に1点）', pick(c => c.type === 'equip')],
-      ['軍需品（1ターンに何枚でも）', pick(c => c.type === 'trainer' && c.kind === 'item')],
-      ['軍師の采配（1ターンに1枚）', pick(c => c.type === 'trainer' && c.kind === 'support')],
-      ['陣形（場に1枚）', pick(c => c.type === 'stadium')],
-    ];
-    let rows = '';
-    sections.forEach(([title, list]) => {
-      if (!list.length) return;
-      rows += `<tr class="dg-sec"><td colspan="3">${esc(title)}</td></tr>`;
-      list.forEach(id => {
-        const c = get(id); const n = deckDraft.counts[id] || 0;
-        const eff = c.type === 'warlord' ? warlordEffShort(c) : esc(c.text || '');
-        rows += `<tr><td class="dg-n">${esc(c.name)}</td>
-          <td class="dg-c"><span class="dedit-ctl">
-            <button class="dedit-btn" data-act="deckeditsub" data-card="${id}" ${n <= 0 ? 'disabled' : ''}>－</button>
-            <b>${n}</b>
-            <button class="dedit-btn" data-act="deckeditadd" data-card="${id}" ${n >= MAX_COPIES ? 'disabled' : ''}>＋</button>
-          </span></td>
-          <td class="dg-e">${eff}</td></tr>`;
+    const tab = deckDraft.tab;
+    let body;
+    if (tab === 'commands') {
+      body = `<div class="ov-note">自由に入れ替えできます。実在するClaude Code/Codexコマンドの中から、このデッキで使う命令を最大${MAX_COMMANDS}種まで選んでください（<b>${deckDraft.commands.length}/${MAX_COMMANDS}</b>選択中）。行にカーソルを乗せると効果が見られます。</div>
+        <input type="text" id="deckCmdFilterInput" class="cmd-filter" placeholder="コマンドを入力して絞り込み（例: /plan、圧縮）" value="${esc(deckDraft.cmdFilter || '')}" autocomplete="off" spellcheck="false">
+        <div class="cmdlist deckcmdlist" id="deckCmdListArea">${renderDeckCmdRows()}</div>`;
+    } else {
+      const legal = legalCardsFor(deck.faction);
+      const get = id => CARDS[id];
+      const pick = fn => legal.filter(id => fn(get(id)));
+      const sections = [
+        ['武将・たね（無名の兵士＝出世の起点／無所属で共通）', pick(c => c.type === 'warlord' && c.stage === 0)],
+        [`武将・侍大将（${esc(deck.faction)}家のみ選べます）`, pick(c => c.type === 'warlord' && c.stage === 1)],
+        ['装備（武将1人に1点）', pick(c => c.type === 'equip')],
+        ['軍需品（1ターンに何枚でも）', pick(c => c.type === 'trainer' && c.kind === 'item')],
+        ['軍師の采配（1ターンに1枚）', pick(c => c.type === 'trainer' && c.kind === 'support')],
+        ['陣形（場に1枚）', pick(c => c.type === 'stadium')],
+      ];
+      let rows = '';
+      sections.forEach(([title, list]) => {
+        if (!list.length) return;
+        rows += `<tr class="dg-sec"><td colspan="3">${esc(title)}</td></tr>`;
+        list.forEach(id => {
+          const c = get(id); const n = deckDraft.counts[id] || 0;
+          const eff = c.type === 'warlord' ? warlordEffShort(c) : esc(c.text || '');
+          rows += `<tr><td class="dg-n">${esc(c.name)}</td>
+            <td class="dg-c"><span class="dedit-ctl">
+              <button class="dedit-btn" data-act="deckeditsub" data-card="${id}" ${n <= 0 ? 'disabled' : ''}>－</button>
+              <b>${n}</b>
+              <button class="dedit-btn" data-act="deckeditadd" data-card="${id}" ${n >= MAX_COPIES ? 'disabled' : ''}>＋</button>
+            </span></td>
+            <td class="dg-e">${eff}</td></tr>`;
+        });
       });
-    });
+      const total = deckDraftTotal();
+      body = `<div class="ov-note">自由に入れ替えできます。<b>選べるのは${esc(deck.faction)}家の武将と無所属の共通札のみ</b>（他家の武将は世界観上、この家には入れられません）。同じカードは${MAX_COPIES}枚まで。大名は本陣の切り札としてデッキ外で自動的に付きます。</div>
+        <div class="dg-wrap"><table class="dg"><thead><tr><th>カード</th><th>枚数</th><th>効能</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    }
     const total = deckDraftTotal();
     const ready = total === DECK_SIZE;
     overlay(`<div class="deckguide deckeditor">
-      <div class="ov-h">${esc(deck.name)} のデッキ編成　<span class="ov-sub ${ready ? '' : 'warn'}">${total}/${DECK_SIZE}枚</span></div>
-      <div class="ov-note">自由に入れ替えできます。<b>選べるのは${esc(deck.faction)}家の武将と無所属の共通札のみ</b>（他家の武将は世界観上、この家には入れられません）。同じカードは${MAX_COPIES}枚まで。大名は本陣の切り札としてデッキ外で自動的に付きます。</div>
-      <div class="dg-wrap"><table class="dg"><thead><tr><th>カード</th><th>枚数</th><th>効能</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="ov-h">${esc(deck.name)} のデッキ編成　<span class="ov-sub ${ready ? '' : 'warn'}">武将札 ${total}/${DECK_SIZE}枚・命令 ${deckDraft.commands.length}/${MAX_COMMANDS}種</span></div>
+      <div class="dtabs">
+        <button class="dtab ${tab === 'cards' ? 'on' : ''}" data-act="deckedittab" data-tab="cards">武将・カード</button>
+        <button class="dtab ${tab === 'commands' ? 'on' : ''}" data-act="deckedittab" data-tab="commands">軍師秘伝の書</button>
+      </div>
+      ${body}
       <div class="ov-foot">
         <button class="btn ghost" data-act="deckeditreset">初期デッキに戻す</button>
         <button class="btn ghost" data-act="closeoverlay">キャンセル</button>
@@ -1361,9 +1457,9 @@
     </div>`);
   }
   function deckEditReset() {
-    const deck = DECKS[deckDraft.deckId];
     const counts = {}; DEFAULT_DECK_CARDS[deckDraft.deckId].forEach(id => counts[id] = (counts[id] || 0) + 1);
     deckDraft.counts = counts;
+    deckDraft.commands = DEFAULT_DECK_COMMANDS[deckDraft.deckId].slice();
     renderDeckEditor();
   }
   function deckEditSave() {
@@ -1371,6 +1467,7 @@
     const cards = [];
     Object.keys(deckDraft.counts).forEach(id => { for (let k = 0; k < deckDraft.counts[id]; k++) cards.push(id); });
     DECKS[deckDraft.deckId].cards = cards;
+    DECKS[deckDraft.deckId].commands = deckDraft.commands.slice();
     deckDraft = null;
     toast('デッキ編成を保存しました');
     hideOverlay(); render();

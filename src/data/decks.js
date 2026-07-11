@@ -53,14 +53,18 @@
     '兵站道','鉄砲陣地',
   ];
 
-  const COMMAND_LOADOUT = ['plan','code-review','security-review','codex-exec','compact','sandbox','agents','rewind','model','memory','deep-research','hooks','yolo','resume'];
+  // 命令の初期構成（軍師秘伝の書＝家ごとに最大8種まで。デッキ編成画面で自由に入れ替え可能）
+  const CMD_ODA      = ['codex-exec','yolo','plan','compact','security-review','deep-research','agents','hooks'];
+  const CMD_TAKEDA   = ['plan','code-review','memory','model','agents','deep-research','compact','rewind'];
+  const CMD_UESUGI   = ['security-review','hooks','sandbox','rewind','compact','resume','memory','plan'];
+  const CMD_TOKUGAWA = ['sandbox','hooks','rewind','compact','resume','code-review','agents','memory'];
+  const CMD_TOYOTOMI = ['compact','agents','model','memory','plan','code-review','deep-research','resume'];
 
   window.DECKS = {
-    oda:      { id:'oda',      name:'織田家', faction:'織田', daimyo:'織田信長', tagline:'火・朱／速攻と鉄砲。出世で押し切る。',        cards: ODA.slice(0,20) },
-    takeda:   { id:'takeda',   name:'武田家', faction:'武田', daimyo:'武田信玄', tagline:'騎馬・藍／騎馬突撃と全体攻撃で圧す。',        cards: TAKEDA.slice(0,20) },
-    uesugi:   { id:'uesugi',   name:'上杉家', faction:'上杉', daimyo:'上杉謙信', tagline:'群青／狙撃と粘り。軍神の一撃で覆す。',        cards: UESUGI.slice(0,20) },
-    tokugawa: { id:'tokugawa', name:'徳川家', faction:'徳川', daimyo:'徳川家康', tagline:'金茶／耐えて反撃。鉄壁の構えで粘る。',        cards: TOKUGAWA.slice(0,20) },
-    toyotomi: { id:'toyotomi', name:'豊臣家', faction:'豊臣', daimyo:'豊臣秀吉', tagline:'金／兵站と物量。軍師（脳容量）が冴える。',    cards: TOYOTOMI.slice(0,20) },
+    oda:      { id:'oda',      name:'織田家', faction:'織田', daimyo:'織田信長', tagline:'火・朱／速攻と鉄砲。出世で押し切る。',        cards: ODA.slice(0,20),      commands: CMD_ODA.slice() },
+    takeda:   { id:'takeda',   name:'武田家', faction:'武田', daimyo:'武田信玄', tagline:'騎馬・藍／騎馬突撃と全体攻撃で圧す。',        cards: TAKEDA.slice(0,20),   commands: CMD_TAKEDA.slice() },
+    uesugi:   { id:'uesugi',   name:'上杉家', faction:'上杉', daimyo:'上杉謙信', tagline:'群青／狙撃と粘り。軍神の一撃で覆す。',        cards: UESUGI.slice(0,20),   commands: CMD_UESUGI.slice() },
+    tokugawa: { id:'tokugawa', name:'徳川家', faction:'徳川', daimyo:'徳川家康', tagline:'金茶／耐えて反撃。鉄壁の構えで粘る。',        cards: TOKUGAWA.slice(0,20), commands: CMD_TOKUGAWA.slice() },
+    toyotomi: { id:'toyotomi', name:'豊臣家', faction:'豊臣', daimyo:'豊臣秀吉', tagline:'金／兵站と物量。軍師（脳容量）が冴える。',    cards: TOYOTOMI.slice(0,20), commands: CMD_TOYOTOMI.slice() },
   };
-  window.COMMAND_LOADOUT = COMMAND_LOADOUT;
 })();

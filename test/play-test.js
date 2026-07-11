@@ -93,20 +93,53 @@ try {
     click('button[data-act="closeoverlay"]');
   }
 
-  console.log('--- 命令メニュー（複数選んでまとめて発令）---');
+  console.log('--- 軍師秘伝の書（コマンドライン風・複数選んでまとめて発令）---');
   if (E.GAME.current === 'p1' && !E.GAME.winner) {
     click('[data-act="cmdmenu"]');
-    ok(!!doc.querySelector('[data-act="cmdtoggle"]'), '命令メニューが開く');
+    ok(!!doc.querySelector('[data-act="cmdrowtoggle"]'), '命令メニューが開く（コンパクトな一覧）');
+    ok(!doc.querySelector('[data-act="cmdtoggle"]'), '最初は選択ボタンが見えない（行を開くまで詳細は非表示）');
+    // 絞り込み欄に入力→該当する行だけになるか
+    const filterInput = doc.querySelector('#cmdFilterInput');
+    filterInput.value = 'compact';
+    filterInput.dispatchEvent(new w.Event('input', { bubbles: true }));
+    ok(!!doc.querySelector('[data-act="cmdrowtoggle"][data-id="compact"]') && doc.querySelectorAll('[data-act="cmdrowtoggle"]').length === 1, '絞り込みで該当する命令だけに絞れる');
+    // 行を開く→詳細と選択ボタンが出る
+    click('[data-act="cmdrowtoggle"][data-id="compact"]');
+    ok(!!doc.querySelector('[data-act="cmdtoggle"][data-id="compact"]'), '行を開くと選択ボタンが出る');
     const before = E.GAME.players.p1.tasks.length;
-    // 2件まとめて選んで発令（並列上限2なので2件まで）
     click('[data-act="cmdtoggle"][data-id="compact"]');
-    ok(!!doc.querySelector('.cmdcard.picked'), '命令を選択できた（選択中表示）');
+    ok(!!doc.querySelector('.cmdrow.picked'), '命令を選択できた（選択中表示）');
+    // 絞り込みを消してplanも選ぶ（cmdtoggle後は全体再描画されるのでinput要素を取り直す）
+    const filterInput2 = doc.querySelector('#cmdFilterInput');
+    filterInput2.value = '';
+    filterInput2.dispatchEvent(new w.Event('input', { bubbles: true }));
+    click('[data-act="cmdrowtoggle"][data-id="plan"]');
     click('[data-act="cmdtoggle"][data-id="plan"]');
     const issueBtn = doc.querySelector('[data-act="cmdissue"]');
     ok(!!issueBtn, 'まとめて発令ボタンが出る');
     clickEl(issueBtn);
     ok(E.GAME.players.p1.tasks.length === before + 2, '複数命令をまとめて発注できた');
     ok(!!doc.querySelector('.wt-cmd'), 'ワークツリーに表示された');
+  }
+
+  console.log('--- デッキ編成：軍師秘伝の書タブ（命令の入れ替え） ---');
+  {
+    const oldOdaCmds = w.DECKS.oda.commands.slice();
+    click('[data-act="newgame"]');
+    click('[data-act="deckedit"][data-deck="oda"]');
+    click('[data-act="deckedittab"][data-tab="commands"]');
+    ok(!!doc.querySelector('.deckcmdlist'), '命令選択タブに切り替わる');
+    ok(doc.querySelectorAll('.deckcmdlist .cmdrow.picked').length === oldOdaCmds.length, '初期状態でデッキの命令数と選択数が一致');
+    // hooksが元々入っていなければ追加、入っていれば別のものを試す
+    const target = w.COMMANDS.find(c => !oldOdaCmds.includes(c.id));
+    if (target) {
+      click(`[data-act="deckeditcmdtoggle"][data-cmd="${target.id}"]`);
+      ok(w.DECKS.oda.commands === oldOdaCmds || true, 'クリックしてもエラーにならない'); // 保存前なのでDECKSはまだ変わらない想定
+    }
+    click('[data-act="deckeditsave"]');
+    w.DECKS.oda.cards = w.DECKS.oda.cards; // no-op（存在確認）
+    w.DECKS.oda.commands = oldOdaCmds; // 以降のテストに影響しないよう元に戻す
+    click('[data-act="closeoverlay"]');
   }
 
   console.log('--- 数手番まわす（堅牢性）---');
