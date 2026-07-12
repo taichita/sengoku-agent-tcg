@@ -327,7 +327,7 @@
       uid: uid(), cmdId: cmd.id, cmd, progress: 0, turns: cmd.turns,
       contextCost: cmd.contextCost, agentType: cmd.agentType, tree, done: false,
     });
-    log(`軍師が命令【${cmd.cmd}（${cmd.name}）】を発注。家臣が動き出した。`);
+    log(`軍師が命令【${cmd.cmd}（${cmd.name}）】を発令。家臣が動き出した。`);
     return ok();
   };
 

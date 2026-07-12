@@ -261,11 +261,11 @@
         else if (/完成/.test(m)) sfx('done');
         else if (/出世して/.test(m)) { sfx('evolve'); flash('var(--kin)'); }
         else if (/出陣/.test(m)) { sfx('deploy'); flash('var(--kin)'); }
-        else if (/発注|発令|動き出した/.test(m)) sfx('command');
+        else if (/発令|動き出した/.test(m)) sfx('command');
         else if (/陣形【/.test(m)) sfx('stadium');
         else if (/兵糧を送った/.test(m)) sfx('attach');
         else if (/場に出した|繰り上げた/.test(m)) sfx('place');
-        if (!bannered && /「.+」！|ダメージ|発注|発令|完成|動き出した|陣形【|兵糧を送った|場に出した|繰り上げた|出世して|討死|勝鬨/.test(m)) {
+        if (!bannered && /「.+」！|ダメージ|発令|完成|動き出した|陣形【|兵糧を送った|場に出した|繰り上げた|出世して|討死|勝鬨/.test(m)) {
           actionBanner(m, l.who === viewer() ? 'me' : 'op');
           bannered = true;
         }
@@ -997,12 +997,12 @@
       ${op.noAgent ? `<div class="ctx-row"><span class="ctx-name">${esc(opLabel)}</span><span class="noagent">軍師なし・兵力で攻める</span></div>` : ctxMeter(opLabel, op)}
       ${uiMode === 'spectate' || me.noAgent ? '' : `<button class="side-command" data-act="cmdmenu">
         <span>軍師の命令</span>
-        <small>脳容量 ${me.context}/${me.contextMax} ・ 発注 ${me.tasks.length}/${me.parallelMax}</small>
+        <small>脳容量 ${me.context}/${me.contextMax} ・ 発令 ${me.tasks.length}/${me.parallelMax}</small>
       </button>`}
-      <div class="panel-sec label">発注中の命令</div>
+      <div class="panel-sec label">発令中の命令</div>
       ${tasksHTML(me, meLabel)}
       ${op.noAgent ? '' : tasksHTML(op, opLabel)}
-      <div class="panel-sec label">Claude Code修行</div>
+      <div class="panel-sec label">戦訓</div>
       ${learningHTML(me)}
       <div class="panel-sec label">ワークツリー（指揮系統）</div>
       ${worktreeHTML(me, meLabel)}
@@ -1019,7 +1019,7 @@
       <span class="ctx-num">${p.context}/${p.contextMax}</span></div>`;
   }
   function tasksHTML(p, who) {
-    if (!p.tasks.length) return `<div class="task-none">${who}：発注なし</div>`;
+    if (!p.tasks.length) return `<div class="task-none">${who}：発令なし</div>`;
     return p.tasks.map(t => {
       const pct = Math.round(t.progress / t.turns * 100);
       const cc = CATEGORY_COLOR[t.cmd.category] || 'var(--sumi)';
@@ -1027,7 +1027,7 @@
         <div class="task-h"><span class="task-cmd">${esc(t.cmd.cmd)}</span><span class="task-name">${esc(t.cmd.name)}</span><span class="task-who ${p.id}">${who}</span></div>
         <div class="task-bar"><span style="width:${pct}%"></span></div>
         <div class="task-sub">残り ${t.turns - t.progress} 手番 ・ ${esc(t.agentType)}</div>
-        ${t.cmd.learn ? `<div class="task-learn">修行：${esc(t.cmd.learn.title)} — ${esc(t.cmd.learn.practice)}</div>` : ''}
+        ${t.cmd.learn ? `<div class="task-learn">学び：${esc(t.cmd.learn.title)} — ${esc(t.cmd.learn.practice)}</div>` : ''}
       </div>`;
     }).join('');
   }
@@ -1107,7 +1107,7 @@
 
   function openCmdMenu() {
     const G = E.GAME; const p = E.cur();
-    if (G.current !== viewer() || G.players[G.current].isAI) { toast('自分の番に発注できます', true); return; }
+    if (G.current !== viewer() || G.players[G.current].isAI) { toast('自分の番に発令できます', true); return; }
     if (p.noAgent) { toast('この陣営に軍師はいません（兵力で攻めます）', true); return; }
     cmdFilter = ''; cmdExpanded = null;
     renderCmdMenu();
@@ -1181,7 +1181,7 @@
           ${cmd.learn ? `<div class="cc-learn">学び：${esc(learnSummary(cmd))}</div>` : ''}
           <div class="cc-desc">${esc(cmd.desc)}</div>
           <div class="cc-foot"><span>脳容量 ${cmd.contextCost}</span><span>完成まで${cmd.turns}手番</span><span>${esc(cmd.agentType)}</span></div>
-          <button class="btn sm ${inCart ? 'cmd' : ''} ${(!inCart && !canAdd) ? 'dim' : ''}" ${(inCart || canAdd) ? `data-act="cmdtoggle" data-id="${cmd.id}"` : ''}>${inCart ? '✓ 選択中（解除する）' : '発注リストに加える'}</button>
+          <button class="btn sm ${inCart ? 'cmd' : ''} ${(!inCart && !canAdd) ? 'dim' : ''}" ${(inCart || canAdd) ? `data-act="cmdtoggle" data-id="${cmd.id}"` : ''}>${inCart ? '✓ 選択中（解除する）' : 'この命令を選ぶ'}</button>
         </div>` : '';
       return `<div class="cmdrow ${open ? 'open' : ''} ${inCart ? 'picked' : ''}" style="--cc:${cc}">
         <div class="cmdrow-head" data-act="cmdrowtoggle" data-id="${cmd.id}">
@@ -1548,8 +1548,8 @@
         <div class="tut-card"><b>② 勝利は「3体討ち取る」</b><p>相手の武将を<b>3体討てば勝ち</b>（自分が3体討たれたら負け）。各家の大名は<b>本陣</b>に控え、味方が<b>2体討たれると3体目の砦として出陣</b>する（本陣にいる間は無傷で、満を持して出てくる）。大名を討てば、それが3体目＝勝ち。</p></div>
         <div class="tut-card"><b>③ 出世（進化）で強くなる</b><p>無名の足軽や騎馬武者が、名を挙げて有名武将（侍大将）へ。手札の出世カードを、その出世元の武将にクリックで重ねる。大名は出世では出ない（本陣の切り札）。</p></div>
         <div class="tut-card"><b>④ 兵糧を送ってワザを撃つ</b><p>右下の兵糧を武将へ送ります（<b>先鋒は1ターン2つまで、後備えと本陣は1つまで</b>）。必要な兵糧がたまったら武将をクリックして攻撃を選びます（攻撃で兵糧を消費し番が終わる）。退き口（交代）は兵糧を消費（種1・侍大将2・大名1）。</p></div>
-        <div class="tut-card"><b>⑤ 軍師の命令（裏）</b><p>「軍師の命令」から本物のClaude Code系コマンド（/plan, /code-review など）を発注。各命令には、ゲーム効果とは別に<b>実務で学ぶ型</b>が付いています。</p></div>
-        <div class="tut-card"><b>⑥ Claude Code修行</b><p>右パネルで、発注中の命令が「計画」「レビュー」「安全確認」「文脈整理」など何の練習なのか見えます。戦いながら、AIに仕事を渡す順番を覚える設計です。</p></div>
+        <div class="tut-card"><b>⑤ 軍師秘伝の書（裏）</b><p>「軍師の命令」から、本物のClaude Code系コマンド（/plan, /code-review など）を発令。入力欄で絞り込み、行をクリックすると詳細が開きます。各命令には、ゲーム効果とは別に<b>実務で学ぶ型</b>が付いています。</p></div>
+        <div class="tut-card"><b>⑥ 戦訓</b><p>右パネルで、発令中の命令が「計画」「レビュー」「安全確認」「文脈整理」など何の練習なのか見えます。戦いながら、AIに仕事を渡す順番を覚える設計です。</p></div>
       </div>
       <div class="ov-foot"><button class="btn" data-act="closeoverlay">閉じて始める</button></div>
     </div>`);

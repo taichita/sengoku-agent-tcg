@@ -568,7 +568,7 @@ body {
   position: absolute;
   inset: 0 344px 0 0;
   display: block;
-  height: 100vh;
+  height: auto;
   padding: 0;
   gap: 0;
   overflow: hidden;
@@ -707,7 +707,7 @@ body {
   left: 0;
   right: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   padding: 96px 32px 210px;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1103,7 +1103,7 @@ body {
 .rail {
   position: absolute;
   z-index: 32;
-  left: calc((100vw - 344px) / 2);
+  left: calc((1180px - 344px) / 2);
   bottom: 150px;
   width: auto;
   min-width: 646px;
@@ -1388,90 +1388,10 @@ body {
   text-shadow: 0 0 8px var(--shu), 2px 2px 0 var(--shu-d), -2px 2px 0 var(--shu-d);
 }
 
-@media (max-width: 1280px) {
-  .board { right: 300px; }
-  .side { width: 276px; }
-  .battle-hud { grid-template-columns: 1fr 250px 1fr; gap: 10px; left: 18px; right: 18px; }
-  .hud-strip { gap: 8px; padding: 0 10px; }
-  .hud-strip span:nth-last-child(n+5) { display: none; }
-  .rail { left: calc((100vw - 300px) / 2); min-width: 560px; }
-  .railbtn { min-width: 68px; }
-}
-
-@media (max-height: 780px) {
-  .battle-hud {
-    top: 12px;
-  }
-
-  .hud-strip,
-  .turn-orb {
-    min-height: 48px;
-  }
-
-  .battle-table {
-    padding-top: 78px;
-    padding-bottom: 174px;
-    grid-template-rows: 168px 96px 196px;
-  }
-
-  .bench {
-    min-height: 86px;
-  }
-
-  .slot.bench.empty {
-    width: 96px;
-    height: 72px;
-  }
-
-  .card.warlord,
-  .card.warlord:not(.big) {
-    width: 96px;
-  }
-
-  .c-art,
-  .card.warlord:not(.big) .c-art {
-    height: 48px;
-  }
-
-  .card.warlord.big {
-    width: 150px;
-  }
-
-  .card.big .c-art {
-    height: 66px;
-  }
-
-  .move {
-    min-height: 26px;
-    padding: 2px 6px;
-  }
-
-  .action-forecast {
-    min-height: 58px;
-    padding: 8px 14px;
-  }
-
-  .action-forecast strong {
-    font-size: 17px;
-  }
-
-  .rail {
-    bottom: 118px;
-    transform: translateX(-50%) scale(.9);
-    transform-origin: center bottom;
-  }
-
-  .handbar {
-    bottom: 12px;
-    transform: translateX(-50%) scale(.82);
-    transform-origin: center bottom;
-  }
-}
-
 /* Feedback pass: commands leave the center; board actions live on cards/panels. */
 .battle-table {
   padding: 92px 28px 172px;
-  grid-template-rows: minmax(156px, 22vh) minmax(72px, 10vh) minmax(252px, 34vh);
+  grid-template-rows: 156fr 72fr 252fr;
   gap: 4px;
 }
 
@@ -1816,44 +1736,6 @@ body {
   100% { opacity: 0; transform: translateX(-50%) translateY(-8px) scale(.98); }
 }
 
-@media (max-width: 1280px) {
-  .rail { left: 18px; }
-  .energy-reserve { right: 20px; width: 98px; height: 98px; }
-}
-
-@media (max-height: 780px) {
-  .battle-table {
-    padding-top: 76px;
-    padding-bottom: 146px;
-    grid-template-rows: minmax(132px, 21vh) minmax(58px, 9vh) minmax(218px, 34vh);
-  }
-
-  .bench,
-  .player-line .bench {
-    min-height: 88px;
-  }
-
-  .handbar {
-    bottom: 0;
-    transform: translateX(-50%) scale(.72);
-  }
-
-  .rail {
-    bottom: 18px;
-    transform: none;
-  }
-
-  .energy-reserve {
-    bottom: 120px;
-    width: 88px;
-    height: 88px;
-  }
-
-  .energy-reserve b {
-    font-size: 28px;
-  }
-}
-
 /* Art-first board pass: cards should read like cards, not dense data tiles. */
 .battle-table {
   padding: 82px 30px 120px;
@@ -2055,65 +1937,6 @@ body {
   outline: 4px solid #ffe1a1;
   outline-offset: 5px;
   box-shadow: 0 0 0 8px rgba(255,225,161,.16), 0 18px 28px rgba(0,0,0,.42), inset 0 0 0 2px rgba(255, 248, 234, .66);
-}
-
-@media (max-height: 780px) {
-  .battle-table {
-    padding-top: 70px;
-    padding-bottom: 104px;
-    grid-template-rows: minmax(136px, 20vh) 44px minmax(320px, 1fr);
-    gap: 6px;
-  }
-
-  .card.warlord,
-  .card.warlord:not(.big) {
-    width: 112px;
-  }
-
-  .card.warlord.big {
-    width: 178px;
-  }
-
-  .c-art,
-  .card.warlord:not(.big) .c-art {
-    height: 68px;
-  }
-
-  .card.big .c-art {
-    height: 112px;
-  }
-
-  .bench,
-  .player-line .bench {
-    min-height: 104px;
-  }
-
-  .slot.bench.empty {
-    width: 108px;
-    height: 84px;
-  }
-
-  .honjin {
-    width: 136px;
-    min-height: 82px;
-  }
-
-  .handbar {
-    width: min(540px, 52vw);
-    bottom: 0;
-    transform: translateX(-50%) scale(.78);
-  }
-
-  .energy-reserve {
-    bottom: 132px;
-    width: 76px;
-    height: 76px;
-  }
-
-  .action-forecast {
-    right: 16px;
-    width: 300px;
-  }
 }
 
 /* Juice pass: keep the card art and moment-to-moment feedback visible. */
@@ -2447,54 +2270,10 @@ body {
   100% { opacity: 0; transform: translate(-50%, -58%) scale(.96); }
 }
 
-@media (max-height: 780px) {
-  .card.warlord.big {
-    width: 190px;
-  }
-
-  .card.big .c-art {
-    height: 124px;
-  }
-
-  .card.warlord:not(.big) .c-art {
-    height: 72px;
-  }
-
-  .honjin {
-    width: 150px;
-    min-height: 90px;
-    grid-template-columns: 48px minmax(0, 1fr);
-    gap: 2px 6px;
-    padding: 5px;
-  }
-
-  .hj-art {
-    width: 48px;
-    height: 76px;
-  }
-
-  .honjin .hj-name {
-    font-size: 14px;
-  }
-
-  .honjin .hj-hp {
-    font-size: 9px;
-  }
-
-  .energy-reserve {
-    grid-template-rows: auto 18px 1fr auto auto;
-  }
-
-  .er-sack {
-    width: 27px;
-    height: 18px;
-  }
-}
-
-/* Visibility pass: keep the opponent row clear of the top HUD. */
+/* Visibility pass: keep the opponent row clear of the top HUD.
+   （grid-template-rowsの最終値は後段のPlay-screen correctionで決まる） */
 .battle-table {
   padding-top: 88px;
-  grid-template-rows: minmax(260px, 30vh) 48px minmax(300px, 1fr);
 }
 
 .field.enemy {
@@ -2550,22 +2329,12 @@ body {
   font-size: 9px;
 }
 
-@media (max-height: 780px) {
-  .battle-table {
-    padding-top: 76px;
-    grid-template-rows: minmax(226px, 31vh) 40px minmax(242px, 1fr);
-  }
-
-  .field.enemy {
-    align-content: center;
-    transform: translateY(12px);
-  }
-}
-
-/* Play-screen correction: keep bench readable below the hand fan. */
+/* Play-screen correction: keep bench readable below the hand fan.
+   盤面は基準サイズ1180x720固定（transform:scaleで縮小/拡大表示）なので、
+   grid-template-rowsは実画面のvh/vwではなくfr（比率）で組んで必ず収まるようにする。 */
 .battle-table {
   padding-bottom: 150px;
-  grid-template-rows: minmax(238px, 28vh) 44px minmax(280px, 1fr);
+  grid-template-rows: 238fr 44fr 280fr;
 }
 
 .field.mine {
@@ -2647,63 +2416,6 @@ body {
   font-size: 7.5px;
 }
 
-@media (max-height: 780px) {
-  .battle-table {
-    padding-top: 76px;
-    padding-bottom: 126px;
-    grid-template-rows: minmax(210px, 29vh) 36px minmax(238px, 1fr);
-  }
-
-  .card.warlord.big {
-    width: 160px;
-  }
-
-  .card.big .c-top {
-    min-height: 28px;
-  }
-
-  .card.big .c-name {
-    font-size: 14px;
-  }
-
-  .card.big .c-art {
-    height: 96px;
-  }
-
-  .player-line .bench {
-    min-height: 92px;
-  }
-
-  .handbar {
-    bottom: 0;
-    width: min(500px, 50vw);
-    transform: translateX(-50%) scale(.78);
-  }
-
-  .hand {
-    min-height: 82px;
-    gap: 4px;
-  }
-
-  .handcard {
-    width: 70px;
-    height: 98px;
-  }
-
-  .hc-thumb {
-    height: 42px;
-  }
-
-  .hc-name {
-    font-size: 9.5px;
-  }
-
-  .hc-eff {
-    height: 19px;
-    font-size: 7px;
-  }
-}
-
 /* Bench-first correction: the player's bench must stay readable even on
    the actual play viewport where the hand fan sits close to the bottom row. */
 .field.mine {
@@ -2734,6 +2446,23 @@ body {
   height: 94px;
 }
 
+/* 手札の最終確定値：盤面は基準サイズ1180x720固定（transform:scaleで縮小/拡大表示）なので、
+   ここより上の縮小段階(vw基準)は積み重なると小さくなりすぎる。固定pxで見やすいサイズに戻す。 */
+.handbar {
+  width: 720px;
+  transform: translateX(-50%) scale(1);
+}
+
+.hand {
+  min-height: 178px;
+  gap: 10px;
+}
+
+.handcard {
+  width: 116px;
+  height: 158px;
+}
+
 .hc-thumb {
   height: 38px;
 }
@@ -2761,52 +2490,6 @@ body {
 .handbar:hover,
 .handbar:focus-within {
   transform: translateX(-50%) translateY(-16px) scale(.84);
-}
-
-@media (max-height: 780px) {
-  .field.mine {
-    transform: translateY(-18px);
-  }
-
-  .card.warlord.big {
-    width: 146px;
-  }
-
-  .card.big .c-art {
-    height: 84px;
-  }
-
-  .handbar {
-    width: min(430px, 42vw);
-    transform: translateX(-50%) scale(.62);
-  }
-
-  .handbar:hover,
-  .handbar:focus-within {
-    transform: translateX(-50%) translateY(-12px) scale(.72);
-  }
-
-  .hand {
-    min-height: 58px;
-  }
-
-  .handcard {
-    width: 58px;
-    height: 82px;
-  }
-
-  .hc-thumb {
-    height: 30px;
-  }
-
-  .hc-name {
-    font-size: 8px;
-  }
-
-  .hc-eff {
-    height: 12px;
-    font-size: 6px;
-  }
 }
 
 /* Hand view: tucked by default, readable when the player inspects it. */
@@ -3029,4 +2712,53 @@ body {
   0% { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(.92); }
   18%, 72% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
   100% { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(.98); }
+}
+
+/* ===========================================================
+   最終確定（2026-07-11）：これより前に積み重なった「調整パス」群が
+   実画面の vw/vh を基準にした値と、盤面の基準サイズ1180x720固定
+   （transform:scaleで縮小/拡大表示）が噛み合わず、要素の重なり・
+   位置ズレを起こしていた。ここでまとめて確定値を上書きする。
+   このブロックより後にこれらのプロパティを触らないこと。
+   =========================================================== */
+.board {
+  height: 100%;
+}
+
+.battle-table {
+  height: 100%;
+  padding: 92px 32px 172px;
+  grid-template-rows: 20fr 9fr 25fr;
+  gap: 8px;
+}
+
+.rail {
+  left: calc((1180px - 344px) / 2);
+  bottom: 150px;
+  width: auto;
+  min-width: 646px;
+  transform: translateX(-50%);
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.handbar {
+  width: 720px;
+  bottom: 8px;
+  transform: translateX(-50%);
+}
+
+.hand {
+  min-height: 178px;
+  gap: 10px;
+  padding: 0 8px 10px;
+}
+
+.handcard {
+  width: 116px;
+  height: 158px;
 }
