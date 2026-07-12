@@ -26,12 +26,16 @@
 - 盤面(`#app`)以外の画面（スタート/布陣/カード詳細/命令メニュー/デッキガイド等）は`#overlay`側の別レイヤーで、`max-width:92vw`等の通常のレスポンシブで対応済み。新しいオーバーレイ画面を作る時も同じパターン（`width`固定＋`max-width:9Xvw`）に合わせる。
 - スマホ縦持ちは盤面デザインが横長のため縮小率が低め(幅基準で約0.3倍)になり文字が小さくなる。横持ちなら約0.5倍で見やすい。将来的にスマホ縦持ち専用レイアウトを作るなら、この「まず動く」状態から着手できる。
 
-### battle-table/rail/handbar の「最終確定」ブロック（2026-07-11追加・重要）
+### battle-table/rail/handbar の「最終確定」ブロック（2026-07-11追加、2026-07-12に原因を再特定して再修正・重要）
 
-`styles/game.css`の対戦画面CSSは「Battle UI overhaul」以降、`.battle-table`や`.rail`、`.handbar`/`.hand`/`.handcard`に対して**「〜pass」「〜correction」という名前の調整ブロックが何度も後から積み重なっている**（Feedback pass / Art-first board pass / Visibility pass / Play-screen correction 等）。各ブロックは同じセレクタを何度も宣言し直しており、**後に書かれたものが（メディアクエリの外側なら常に）勝つ**というCSSの仕様上、実際に効いているのはファイルの一番後ろにあるものだけ。2026-07-11に判明したのは、この積み重ねが実画面のvw/vh（`21vh`等）を基準にした数値と、盤面の基準サイズ1180×720固定（`--ui-scale`で縮小/拡大表示）が噛み合っておらず、**素材同士が重なって表示される・手札が極端に小さくなる**という不具合を起こしていたこと。
-- **直した場所**：ファイル末尾に「最終確定」というコメント付きのブロックを追加し、`.board`（height）・`.battle-table`（height/padding/grid-template-rows）・`.rail`（left/位置/flex-direction）・`.handbar`/`.hand`/`.handcard`（サイズ）を明示的に上書きして確定させた。**このブロックより後にこれらのプロパティを追加/編集しないこと**（cascadeの一番最後＝常に勝つ、という前提で書いてあるため、後ろに何か足すと今度はそっちが勝ってしまう）。
-- **今後この画面を触るとき**：`grid-template-rows`などのサイズ指定は`vh`/`vw`を使わず、`fr`（比率）か固定`px`で書くこと（盤面は常に1180×720固定なので、実画面サイズに応じた値を書く必要はない・書くと壊れる）。
-- 現状ブラウザでの目視確認ができない状態でこの修正を行ったため、**次回セッションで最初に実際の見た目を確認すること**。
+`styles/game.css`の対戦画面CSSは「Battle UI overhaul」以降、`.battle-table`や`.rail`、`.handbar`/`.hand`/`.handcard`、カードの`.c-art`（絵の高さ）、`.slot.bench.empty`等に対して**「〜pass」「〜correction」という名前の調整ブロックが何度も後から積み重なっている**（Feedback pass / Art-first board pass / Visibility pass / Play-screen correction / Bench-first correction 等）。各ブロックは同じセレクタを何度も宣言し直しており、**後に書かれたものが（メディアクエリの外側なら常に）勝つ**というCSSの仕様上、実際に効いているのはファイルの一番後ろにあるものだけ。
+
+- **直した場所**：ファイル末尾の「最終確定」ブロックで `.board`・`.battle-table`（height/padding/grid-template-rows）・`.rail`・`.handbar`/`.hand`/`.handcard`・`.action-forecast`（位置）を明示的に上書き。加えて、カード内部の`.c-art`（絵）・`.c-top`/`.c-foot`・`.honjin`・`.slot.bench.empty`/`.slot.active.empty`の高さも複数箇所で縮小（後述の理由）。**このブロックより後にこれらのプロパティを追加/編集しないこと**。
+- **2026-07-12に判明した、より深い原因**：`grid-template-rows: 20fr 9fr 25fr` のように**`fr`だけを指定すると、CSS Gridは各行に暗黙の`min-height:auto`（＝中身の実寸）を適用する**。中身（カードや空枠）の実寸が`fr`按分より大きいと、**行は縮まず中身のサイズで膨張し、paddingで確保したはずの下部余白（命令バー・手札の場所）を浸食する**。これが「後備え・先鋒・命令バー・手札が重なる」不具合の真因で、2026-07-11の修正はpadding/grid-template-rowsの数値だけ直しており、この「fr行は中身より縮まない」性質を見落としていた。
+  - **対処**：`grid-template-rows: minmax(0, 20fr) minmax(0, 9fr) minmax(0, 25fr)` のように**`minmax(0, Nfr)`で明示的に下限0を指定**し、行が本当にpadding基準の按分サイズまで縮むようにした。その上で、縮んだ行に中身が収まるよう、カードの`.c-art`高さや`.slot.*.empty`のサイズ、`.honjin`のサイズを複数箇所（同一セレクタが何度も再宣言されているため、実際に効いている＝ファイル内で一番後ろの宣言）縮小した。
+  - **今後この画面の「行が縮まない／中身が下にはみ出る」系の不具合を疑ったら、まずここ（`fr`の暗黙のauto最小値）を疑うこと**。`grid-template-rows`は必ず`minmax(0, Nfr)`の形で書く。
+- **検証方法（重要・2026-07-12に確立）**：ブラウザの`computer`screenshotはこの環境で断続的にタイムアウトすることがある。その場合は**代わりに`javascript_tool`で`getBoundingClientRect()`を`#app`のscale（`getComputedStyle(#app).transform`の行列から取得）で割り戻し、盤面内部座標（0〜1180×0〜720）に変換して要素同士の重なりを数値で確認する**のが最も確実（見た目の解釈より数値の方が信頼できる）。加えて`node test/shot10.js`（Playwrightで実レンダリング・複数画面サイズ・はみ出し/ガタつき/スクロールを自動判定）は`computer`が使えない状況でも動く独立した検証経路なので、**レイアウトを触ったら必ずこちらも回すこと**。「目視確認できていない」まま直った旨を報告するのは避け、上記のいずれかで実際に確認してから報告する。
+- **未解決の軽微な既知の粗（2026-07-12時点）**：ターン開始時の「〇〇の番」トースト（`.fx-turn`）と行動ログのバナー（`.fx-action`、`src/ui/ui.js`の`turnBanner`/`actionBanner`）は`document.body`に直接追加され`position:fixed`＋`vw`/`vh`相当（`%`）で位置指定されており、盤面のスケール機構の外側にある。表示は1〜1.5秒の一過性だが、その間だけ盤上のカードに軽く重なることがある。常時表示ではないため今回は対象外としたが、根本対応するなら`#app`内へ追加してcanvas座標系（px）で位置指定するのが一貫性がある。
 
 ## ファイル地図
 
